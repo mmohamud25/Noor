@@ -9,23 +9,23 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --dark:   #0A1410;
-    --panel:  #111D17;
-    --card:   #162218;
+    --dark:   #F5F2EB;
+    --panel:  #EDE9DF;
+    --card:   #FFFFFF;
     --green:  #1B4332;
     --mid:    #2D6A4F;
-    --gold:   #C9A84C;
-    --goldL:  #E8CC7A;
-    --cream:  #F5F0E8;
-    --muted:  rgba(245,240,232,0.45);
-    --border: rgba(201,168,76,0.18);
+    --gold:   #A0793A;
+    --goldL:  #C9A84C;
+    --cream:  #1C1C1A;
+    --muted:  rgba(28,28,26,0.5);
+    --border: rgba(160,121,58,0.18);
   }
 
   html { scroll-behavior: smooth; }
 
   body {
-    background: var(--dark);
-    color: var(--cream);
+    background: #F8F6F1;
+    color: #1A1A1A;
     font-family: 'DM Sans', sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
@@ -37,9 +37,9 @@
     z-index: 100;
     display: flex; align-items: center; justify-content: space-between;
     padding: 18px 40px;
-    background: rgba(10,20,16,0.85);
+    background: rgba(248,246,241,0.92);
     backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(201,168,76,0.08);
+    border-bottom: 1px solid rgba(160,121,58,0.15);
   }
 
   .nav-brand {
@@ -59,11 +59,11 @@
   .nav-icon .ar { font-family: 'Amiri', serif; font-size: 16px; color: var(--gold); line-height: 1; }
   .nav-icon .en { font-size: 6px; letter-spacing: 0.2em; color: rgba(245,240,232,0.4); text-transform: uppercase; }
 
-  .nav-wordmark { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 600; color: var(--cream); }
+  .nav-wordmark { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 600; color: #1A1A1A; }
 
   .nav-cta {
     background: var(--gold);
-    color: var(--dark);
+    color: #FFFFFF;
     padding: 9px 22px;
     border-radius: 20px;
     font-size: 13px;
@@ -90,15 +90,15 @@
   .hero-bg {
     position: absolute; inset: 0;
     background:
-      radial-gradient(ellipse 60% 50% at 50% 0%, rgba(27,67,50,0.6) 0%, transparent 70%),
-      radial-gradient(ellipse 40% 40% at 80% 80%, rgba(201,168,76,0.06) 0%, transparent 60%);
+      radial-gradient(ellipse 60% 50% at 50% 0%, rgba(27,67,50,0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 80% 80%, rgba(160,121,58,0.08) 0%, transparent 60%);
   }
 
   .watermark {
     position: absolute;
     font-family: 'Amiri', serif;
     font-size: clamp(180px, 40vw, 320px);
-    color: rgba(201,168,76,0.04);
+    color: rgba(160,121,58,0.06);
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     line-height: 1;
@@ -109,8 +109,8 @@
 
   .hero-badge {
     display: inline-flex; align-items: center; gap: 6px;
-    background: rgba(201,168,76,0.1);
-    border: 1px solid rgba(201,168,76,0.2);
+    background: rgba(160,121,58,0.1);
+    border: 1px solid rgba(160,121,58,0.25);
     border-radius: 20px;
     padding: 6px 16px;
     font-size: 11px;
@@ -137,7 +137,7 @@
     font-size: clamp(48px, 10vw, 80px);
     font-weight: 600;
     line-height: 1.05;
-    color: var(--cream);
+    color: #1A1A1A;
     margin-bottom: 8px;
     position: relative;
   }
@@ -182,7 +182,7 @@
 
   .hero-note {
     font-size: 11px;
-    color: rgba(245,240,232,0.25);
+    color: rgba(28,28,26,0.35);
     letter-spacing: 0.1em;
     position: relative;
   }
@@ -193,7 +193,7 @@
     justify-content: center;
     gap: 20px;
     padding: 80px 24px;
-    background: linear-gradient(180deg, var(--dark) 0%, var(--panel) 50%, var(--dark) 100%);
+    background: linear-gradient(180deg, #F5F2EB 0%, #E8E4D9 50%, #F5F2EB 100%);
     overflow: hidden;
     position: relative;
   }
@@ -201,16 +201,16 @@
   .phone-section::before {
     content: '';
     position: absolute; inset: 0;
-    background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(27,67,50,0.2) 0%, transparent 70%);
+    background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(27,67,50,0.06) 0%, transparent 70%);
   }
 
   .phone {
     width: 160px;
-    background: var(--card);
-    border: 1px solid var(--border);
+    background: #FFFFFF;
+    border: 1px solid rgba(160,121,58,0.15);
     border-radius: 28px;
     overflow: hidden;
-    box-shadow: 0 32px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
+    box-shadow: 0 20px 48px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.05), 0 0 0 1px rgba(255,255,255,0.05);
     position: relative;
     transition: transform 0.4s ease;
     flex-shrink: 0;
@@ -223,7 +223,7 @@
 
   .phone-notch {
     width: 60px; height: 20px;
-    background: var(--dark);
+    background: #F8F6F1;
     border-radius: 0 0 12px 12px;
     margin: 0 auto;
     position: relative; z-index: 2;
@@ -244,21 +244,21 @@
   .ps-grid { display: grid; grid-template-columns: repeat(6,1fr); gap: 3px; margin-bottom: 8px; }
   .ps-cell {
     aspect-ratio: 1; border-radius: 3px;
-    background: rgba(255,255,255,0.04);
+    background: rgba(0,0,0,0.04);
     border: 1px solid rgba(255,255,255,0.05);
     display: flex; align-items: center; justify-content: center;
     font-size: 6px; color: var(--muted);
   }
-  .ps-cell.done    { background: rgba(45,106,79,0.5); border-color: var(--mid); color: var(--cream); }
+  .ps-cell.done    { background: rgba(45,106,79,0.5); border-color: var(--mid); color: #1A1A1A; }
   .ps-cell.reading { background: rgba(201,168,76,0.15); border-color: var(--gold); color: var(--gold); }
 
-  .ps-bar { height: 3px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden; margin-bottom: 6px; }
+  .ps-bar { height: 3px; background: rgba(0,0,0,0.06); border-radius: 2px; overflow: hidden; margin-bottom: 6px; }
   .ps-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--mid), var(--gold)); }
 
-  .ps-row { height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; margin-bottom: 4px; }
+  .ps-row { height: 6px; background: rgba(0,0,0,0.06); border-radius: 3px; margin-bottom: 4px; }
   .ps-row.w60 { width: 60%; }
   .ps-row.w45 { width: 45%; }
-  .ps-row.gold { background: rgba(201,168,76,0.3); width: 70%; }
+  .ps-row.gold { background: rgba(160,121,58,0.35); width: 70%; }
 
   .ps-arabic { font-family: 'Amiri', serif; font-size: 18px; color: var(--gold); direction: rtl; text-align: right; margin-bottom: 4px; }
 
@@ -271,7 +271,7 @@
     font-size: 16px; color: var(--gold);
   }
 
-  .ps-lesson { background: rgba(255,255,255,0.03); border-radius: 8px; padding: 6px 8px; margin-bottom: 5px; display: flex; align-items: center; gap: 6px; }
+  .ps-lesson { background: rgba(0,0,0,0.03); border-radius: 8px; padding: 6px 8px; margin-bottom: 5px; display: flex; align-items: center; gap: 6px; }
   .ps-check { width: 12px; height: 12px; border-radius: 3px; background: var(--mid); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 7px; }
   .ps-ltext { font-size: 7px; color: var(--muted); line-height: 1.3; }
 
@@ -291,7 +291,7 @@
     font-family: 'Cormorant Garamond', serif;
     font-size: clamp(32px, 5vw, 48px);
     font-weight: 600; text-align: center;
-    color: var(--cream); margin-bottom: 8px; line-height: 1.2;
+    color: #1A1A1A; margin-bottom: 8px; line-height: 1.2;
   }
 
   .section-sub {
@@ -307,17 +307,17 @@
   }
 
   .feature-card {
-    background: var(--card);
-    border: 1px solid var(--border);
+    background: #FFFFFF;
+    border: 1px solid rgba(160,121,58,0.15);
     border-radius: 20px;
     padding: 28px 24px;
     transition: all 0.3s;
   }
 
   .feature-card:hover {
-    border-color: rgba(201,168,76,0.4);
+    border-color: rgba(160,121,58,0.4);
     transform: translateY(-4px);
-    box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.1);
   }
 
   .feature-icon {
@@ -327,7 +327,7 @@
   .feature-title {
     font-family: 'Cormorant Garamond', serif;
     font-size: 20px; font-weight: 600;
-    color: var(--cream); margin-bottom: 8px;
+    color: #1A1A1A; margin-bottom: 8px;
   }
 
   .feature-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
@@ -349,7 +349,7 @@
   .cta-section::before {
     content: '';
     position: absolute; inset: 0;
-    background: radial-gradient(ellipse 50% 70% at 50% 100%, rgba(27,67,50,0.4) 0%, transparent 70%);
+    background: radial-gradient(ellipse 50% 70% at 50% 100%, rgba(27,67,50,0.06) 0%, transparent 70%);
   }
 
   .cta-arabic {
@@ -364,7 +364,7 @@
   .cta-title {
     font-family: 'Cormorant Garamond', serif;
     font-size: clamp(36px, 6vw, 56px);
-    font-weight: 600; color: var(--cream);
+    font-weight: 600; color: #1A1A1A;
     margin-bottom: 16px; line-height: 1.15;
     position: relative;
   }
@@ -373,13 +373,13 @@
 
   /* ── FOOTER ── */
   footer {
-    border-top: 1px solid rgba(201,168,76,0.08);
+    border-top: 1px solid rgba(160,121,58,0.15);
     padding: 32px 40px;
     display: flex; align-items: center; justify-content: space-between;
     flex-wrap: wrap; gap: 16px;
   }
 
-  .footer-brand { font-family: 'Cormorant Garamond', serif; font-size: 18px; color: var(--muted); }
+  .footer-brand { font-family: 'Cormorant Garamond', serif; font-size: 18px; color: rgba(28,28,26,0.5); }
   .footer-copy  { font-size: 11px; color: rgba(245,240,232,0.2); }
 
   .footer-links { display: flex; gap: 20px; }
@@ -393,6 +393,76 @@
     footer { padding: 24px 20px; flex-direction: column; align-items: flex-start; }
     .phone:nth-child(3) { display: none; }
     .phone:nth-child(2) { transform: translateY(-10px); }
+  }
+
+  /* ── DARK THEME ── */
+  body.dark-mode {
+    --dark:   #0A1410;
+    --panel:  #111D17;
+    --card:   #162218;
+    --green:  #1B4332;
+    --mid:    #2D6A4F;
+    --gold:   #C9A84C;
+    --goldL:  #E8CC7A;
+    --cream:  #F5F0E8;
+    --muted:  rgba(245,240,232,0.45);
+    --border: rgba(201,168,76,0.18);
+  }
+  body.dark-mode { background: #0A1410; color: #F5F0E8; }
+  body.dark-mode .hero-title,
+  body.dark-mode .section-heading,
+  body.dark-mode .cta-title,
+  body.dark-mode .feature-title { color: #F5F0E8; }
+  body.dark-mode .hero-note { color: rgba(245,240,232,0.25); }
+  body.dark-mode nav { background: rgba(10,20,16,0.9); border-bottom: 1px solid rgba(201,168,76,0.08); }
+  body.dark-mode .feature-card { background: #162218; border-color: rgba(201,168,76,0.18); }
+  body.dark-mode .feature-card:hover { border-color: rgba(201,168,76,0.4); box-shadow: 0 16px 40px rgba(0,0,0,0.3); }
+  body.dark-mode .phone-section { background: linear-gradient(180deg, #0A1410 0%, #111D17 50%, #0A1410 100%); }
+  body.dark-mode .phone { background: #162218; box-shadow: 0 32px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05); }
+  body.dark-mode .phone-notch { background: #0A1410; }
+  body.dark-mode .ps-row { background: rgba(255,255,255,0.05); }
+  body.dark-mode .ps-row.gold { background: rgba(201,168,76,0.3); }
+  body.dark-mode .ps-bar { background: rgba(255,255,255,0.05); }
+  body.dark-mode .hero-bg {
+    background:
+      radial-gradient(ellipse 60% 50% at 50% 0%, rgba(27,67,50,0.6) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 80% 80%, rgba(201,168,76,0.06) 0%, transparent 60%);
+  }
+  body.dark-mode .cta-section::before {
+    background: radial-gradient(ellipse 50% 70% at 50% 100%, rgba(27,67,50,0.4) 0%, transparent 70%);
+  }
+  body.dark-mode footer { border-top: 1px solid rgba(201,168,76,0.08); }
+  body.dark-mode .footer-brand { color: rgba(245,240,232,0.4); }
+  body.dark-mode .footer-links a { color: rgba(245,240,232,0.45); }
+  body.dark-mode .dl-btn.apple { background: #000; color: #fff; border-color: transparent; }
+  body.dark-mode .dl-btn.google { background: transparent; color: #F5F0E8; border-color: rgba(201,168,76,0.18); }
+  body.dark-mode .dl-btn.google:hover { border-color: rgba(201,168,76,0.5); }
+  body.dark-mode .watermark { color: rgba(201,168,76,0.04); }
+
+  /* ── THEME TOGGLE BUTTON ── */
+  .theme-toggle {
+    position: fixed;
+    bottom: 28px;
+    right: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 20px;
+    z-index: 200;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+  }
+  .theme-toggle:hover { transform: scale(1.1); }
+
+  /* ── SMOOTH TRANSITION ── */
+  body, nav, .feature-card, .phone, footer, .phone-section {
+    transition: background 0.6s ease, color 0.6s ease, border-color 0.6s ease;
   }
 </style>
 </head>
@@ -429,7 +499,7 @@
       <svg height="54" viewBox="0 0 180 54" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="54" rx="10" fill="#000"/><rect width="180" height="54" rx="10" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1"/><path d="M29.5 13.5c2.2-2.8 1.9-5.8 1.9-5.8s-2.9.2-4.9 2.3c-1.7 1.9-2.1 4.5-2.1 4.5s2.9.1 5.1-2zm1.3 3.2c-2.9 0-5.2 1.7-6.6 1.7-1.5 0-3.6-1.6-6-1.6-3 0-6.2 1.8-7.9 4.8-3.3 5.8-.9 14.4 2.3 19 1.6 2.3 3.6 4.9 6.2 4.8 2.4-.1 3.4-1.6 6.4-1.6 3 0 3.8 1.6 6.4 1.5 2.7 0 4.4-2.3 6-4.7 1.9-2.7 2.7-5.2 2.7-5.3-.1 0-5.1-2-5.1-7.7 0-4.8 3.9-7.1 4.1-7.2-2.3-3.4-5.8-3.7-6.1-3.7" fill="#fff" transform="scale(0.75) translate(4,4)"/><text x="50" y="21" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="11" fill="rgba(255,255,255,0.65)">Download on the</text><text x="50" y="38" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="19" font-weight="600" fill="#fff">App Store</text></svg>
     </a>
     <a href="#" class="dl-btn google">
-      <svg height="54" viewBox="0 0 195 54" xmlns="http://www.w3.org/2000/svg"><rect width="195" height="54" rx="10" fill="#1c1c1c"/><rect width="195" height="54" rx="10" fill="none" stroke="rgba(201,168,76,0.3)" stroke-width="1"/><defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#00bcd4"/><stop offset="50%" stop-color="#4caf50"/><stop offset="100%" stop-color="#ffeb3b"/></linearGradient></defs><polygon points="18,14 18,40 33,27" fill="url(#g1)" transform="translate(6,0)"/><text x="52" y="21" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="11" fill="rgba(245,240,232,0.55)">Get it on</text><text x="52" y="38" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="19" font-weight="600" fill="#F5F0E8">Google Play</text></svg>
+      <svg height="54" viewBox="0 0 195 54" xmlns="http://www.w3.org/2000/svg"><rect width="195" height="54" rx="10" fill="#2D2D2D"/><rect width="195" height="54" rx="10" fill="none" stroke="rgba(201,168,76,0.3)" stroke-width="1"/><defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#00bcd4"/><stop offset="50%" stop-color="#4caf50"/><stop offset="100%" stop-color="#ffeb3b"/></linearGradient></defs><polygon points="18,14 18,40 33,27" fill="url(#g1)" transform="translate(6,0)"/><text x="52" y="21" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="11" fill="rgba(245,240,232,0.55)">Get it on</text><text x="52" y="38" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="19" font-weight="600" fill="#F5F0E8">Google Play</text></svg>
     </a>
   </div>
 
@@ -563,13 +633,13 @@
         <svg height="54" viewBox="0 0 180 54" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="54" rx="10" fill="#000"/><rect width="180" height="54" rx="10" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1"/><path d="M29.5 13.5c2.2-2.8 1.9-5.8 1.9-5.8s-2.9.2-4.9 2.3c-1.7 1.9-2.1 4.5-2.1 4.5s2.9.1 5.1-2zm1.3 3.2c-2.9 0-5.2 1.7-6.6 1.7-1.5 0-3.6-1.6-6-1.6-3 0-6.2 1.8-7.9 4.8-3.3 5.8-.9 14.4 2.3 19 1.6 2.3 3.6 4.9 6.2 4.8 2.4-.1 3.4-1.6 6.4-1.6 3 0 3.8 1.6 6.4 1.5 2.7 0 4.4-2.3 6-4.7 1.9-2.7 2.7-5.2 2.7-5.3-.1 0-5.1-2-5.1-7.7 0-4.8 3.9-7.1 4.1-7.2-2.3-3.4-5.8-3.7-6.1-3.7" fill="#fff" transform="scale(0.75) translate(4,4)"/><text x="50" y="21" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="11" fill="rgba(255,255,255,0.65)">Download on the</text><text x="50" y="38" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="19" font-weight="600" fill="#fff">App Store</text></svg>
       </a>
       <a id="google-btn-cta" href="#" class="dl-btn google">
-        <svg height="54" viewBox="0 0 195 54" xmlns="http://www.w3.org/2000/svg"><rect width="195" height="54" rx="10" fill="#1c1c1c"/><rect width="195" height="54" rx="10" fill="none" stroke="rgba(201,168,76,0.3)" stroke-width="1"/><defs><linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#00bcd4"/><stop offset="50%" stop-color="#4caf50"/><stop offset="100%" stop-color="#ffeb3b"/></linearGradient></defs><polygon points="18,14 18,40 33,27" fill="url(#g2)" transform="translate(6,0)"/><text x="52" y="21" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="11" fill="rgba(245,240,232,0.55)">Get it on</text><text x="52" y="38" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="19" font-weight="600" fill="#F5F0E8">Google Play</text></svg>
+        <svg height="54" viewBox="0 0 195 54" xmlns="http://www.w3.org/2000/svg"><rect width="195" height="54" rx="10" fill="#2D2D2D"/><rect width="195" height="54" rx="10" fill="none" stroke="rgba(201,168,76,0.3)" stroke-width="1"/><defs><linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#00bcd4"/><stop offset="50%" stop-color="#4caf50"/><stop offset="100%" stop-color="#ffeb3b"/></linearGradient></defs><polygon points="18,14 18,40 33,27" fill="url(#g2)" transform="translate(6,0)"/><text x="52" y="21" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="11" fill="rgba(245,240,232,0.55)">Get it on</text><text x="52" y="38" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="19" font-weight="600" fill="#F5F0E8">Google Play</text></svg>
       </a>
     </div>
 
     <!-- QR Code section -->
     <div style="display:flex;align-items:center;gap:32px;background:rgba(255,255,255,0.03);border:1px solid rgba(201,168,76,0.15);border-radius:20px;padding:24px 32px;flex-wrap:wrap;justify-content:center;">
-      <!-- QR code SVG (generated to point to noorapp.com) -->
+      <!-- QR code SVG (generated to point to noor.mmohamud.me) -->
       <div style="background:#fff;border-radius:12px;padding:12px;display:flex;align-items:center;justify-content:center;">
         <canvas id="qr-canvas" width="120" height="120"></canvas>
       </div>
@@ -578,7 +648,7 @@
         <div style="font-size:12px;color:var(--muted);line-height:1.6;">Point your phone camera at the QR code. It detects your device and takes you straight to the right store.</div>
         <div style="margin-top:12px;display:flex;gap:8px;align-items:center;">
           <div style="width:8px;height:8px;border-radius:50%;background:var(--gold);"></div>
-          <span style="font-size:11px;color:rgba(245,240,232,0.4);letter-spacing:0.1em;">noorapp.com</span>
+          <span style="font-size:11px;color:rgba(245,240,232,0.4);letter-spacing:0.1em;">noor.mmohamud.me</span>
         </div>
       </div>
     </div>
@@ -595,13 +665,74 @@
   <span class="footer-copy">© 2026 Noor. All rights reserved.</span>
 </footer>
 
+
+<!-- THEME TOGGLE -->
+<button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+
+<script>
+// ── TIME-BASED THEME ──
+// Light mode: 5am - 7pm (Fajr to Maghrib)
+// Dark mode:  7pm - 5am (Maghrib to Fajr)
+
+const APPLE_URL_2  = "https://apps.apple.com/app/noor/id000000000";
+const GOOGLE_URL_2 = "https://play.google.com/store/apps/details?id=com.kulangroup.noor";
+
+function getThemeByTime() {
+  const hour = new Date().getHours();
+  return (hour >= 5 && hour < 19) ? 'light' : 'dark';
+}
+
+function applyTheme(theme, manual = false) {
+  const body   = document.body;
+  const toggle = document.getElementById('theme-toggle');
+  if (theme === 'dark') {
+    body.classList.add('dark-mode');
+    if (toggle) toggle.textContent = '☀️';
+    if (toggle) toggle.title = 'Switch to light mode';
+  } else {
+    body.classList.remove('dark-mode');
+    if (toggle) toggle.textContent = '🌙';
+    if (toggle) toggle.title = 'Switch to dark mode';
+  }
+  if (manual) localStorage.setItem('noor-theme-override', theme);
+}
+
+function toggleTheme() {
+  const isDark = document.body.classList.contains('dark-mode');
+  applyTheme(isDark ? 'light' : 'dark', true);
+}
+
+// On load — check for manual override, else use time
+const override = localStorage.getItem('noor-theme-override');
+const autoTheme = getThemeByTime();
+
+// Apply immediately before render to prevent flash
+if (override) {
+  applyTheme(override);
+} else {
+  applyTheme(autoTheme);
+}
+
+// Show the current theme info in console
+const hour = new Date().getHours();
+const period = (hour >= 5 && hour < 19) ? 'Day (Light)' : 'Night (Dark)';
+console.log(`Noor — Time-based theme: ${period} (${hour}:00) | Override: ${override || 'none'}`);
+
+// Auto-switch check every minute
+setInterval(() => {
+  if (!localStorage.getItem('noor-theme-override')) {
+    applyTheme(getThemeByTime());
+  }
+}, 60000);
+</script>
+
 <script src="https://analytics.kulaninstitute.org/tracker.js" data-site-id="Noor" async></script>
 
 <script>
 // ── STORE URLS (replace with real links after App Store approval) ──
 const APPLE_URL  = "https://apps.apple.com/app/noor/id000000000";
 const GOOGLE_URL = "https://play.google.com/store/apps/details?id=com.kulangroup.noor";
-const SITE_URL   = "https://noorapp.com";
+const SITE_URL   = "https://noor.mmohamud.me";
 
 // ── DEVICE DETECTION ──
 const ua = navigator.userAgent || navigator.vendor || window.opera;
@@ -645,7 +776,7 @@ if (isMobile) {
   document.getElementById('desktop-download').style.display = 'flex';
 
   // ── QR CODE (pure JS — no library needed) ──
-  // Simple QR-like visual using canvas that points to noorapp.com
+  // Simple QR-like visual using canvas that points to noor.mmohamud.me
   // For production: replace with a real QR code library like qrcode.js
   const canvas = document.getElementById('qr-canvas');
   const ctx    = canvas.getContext('2d');
