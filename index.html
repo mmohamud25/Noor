@@ -1,847 +1,979 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Noor — Islamic Learning App</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Amiri:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+import { useState, useEffect, useRef, useCallback } from "react";
 
-  :root {
-    --dark:   #F5F2EB;
-    --panel:  #EDE9DF;
-    --card:   #FFFFFF;
-    --green:  #1B4332;
-    --mid:    #2D6A4F;
-    --gold:   #A0793A;
-    --goldL:  #C9A84C;
-    --cream:  #1C1C1A;
-    --muted:  rgba(28,28,26,0.5);
-    --border: rgba(160,121,58,0.18);
-  }
+const G = {
+  bg:"#EEE9DF", panel:"#E4DDD1", card:"#F6F2EA",
+  green:"#1B4332", mid:"#2D6A4F", gold:"#9A7235", goldL:"#C9A84C",
+  ink:"#1A1A18", muted:"rgba(26,26,24,0.5)", border:"rgba(154,114,53,0.18)",
+};
+const DK = {
+  bg:"#0A1410", panel:"#111D17", card:"#162218",
+  green:"#1B4332", mid:"#2D6A4F", gold:"#C9A84C", goldL:"#E8CC7A",
+  ink:"#F5F0E8", muted:"rgba(245,240,232,0.45)", border:"rgba(201,168,76,0.18)",
+};
 
-  html { scroll-behavior: smooth; }
-
-  body {
-    background: #F8F6F1;
-    color: #1A1A1A;
-    font-family: 'DM Sans', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* ── NAV ── */
-  nav {
-    position: fixed; top: 0; left: 0; right: 0;
-    z-index: 100;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 18px 40px;
-    background: rgba(248,246,241,0.92);
-    backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(160,121,58,0.15);
-  }
-
-  .nav-brand {
-    display: flex; align-items: center; gap: 10px;
-    text-decoration: none;
-  }
-
-  .nav-icon {
-    width: 36px; height: 36px; border-radius: 9px;
-    background: linear-gradient(135deg, var(--green), #0D2B1F);
-    border: 1px solid rgba(201,168,76,0.3);
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: 0;
-  }
-
-  .nav-icon .ar { font-family: 'Amiri', serif; font-size: 16px; color: var(--gold); line-height: 1; }
-  .nav-icon .en { font-size: 6px; letter-spacing: 0.2em; color: rgba(245,240,232,0.4); text-transform: uppercase; }
-
-  .nav-wordmark { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 600; color: #1A1A1A; }
-
-  .nav-cta {
-    background: var(--gold);
-    color: #FFFFFF;
-    padding: 9px 22px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 500;
-    text-decoration: none;
-    letter-spacing: 0.03em;
-    transition: opacity 0.2s;
-  }
-  .nav-cta:hover { opacity: 0.85; }
-
-  /* ── HERO ── */
-  .hero {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 120px 24px 80px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .hero-bg {
-    position: absolute; inset: 0;
-    background:
-      radial-gradient(ellipse 60% 50% at 50% 0%, rgba(27,67,50,0.08) 0%, transparent 70%),
-      radial-gradient(ellipse 40% 40% at 80% 80%, rgba(160,121,58,0.08) 0%, transparent 60%);
-  }
-
-  .watermark {
-    position: absolute;
-    font-family: 'Amiri', serif;
-    font-size: clamp(180px, 40vw, 320px);
-    color: rgba(160,121,58,0.06);
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    line-height: 1;
-    user-select: none;
-    pointer-events: none;
-    white-space: nowrap;
-  }
-
-  .hero-badge {
-    display: inline-flex; align-items: center; gap: 6px;
-    background: rgba(160,121,58,0.1);
-    border: 1px solid rgba(160,121,58,0.25);
-    border-radius: 20px;
-    padding: 6px 16px;
-    font-size: 11px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--gold);
-    margin-bottom: 28px;
-    position: relative;
-  }
-
-  .hero-badge-dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--gold);
-    animation: blink 2s ease-in-out infinite;
-  }
-
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: 0.3; }
-  }
-
-  .hero-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(48px, 10vw, 80px);
-    font-weight: 600;
-    line-height: 1.05;
-    color: #1A1A1A;
-    margin-bottom: 8px;
-    position: relative;
-  }
-
-  .hero-arabic {
-    font-family: 'Amiri', serif;
-    font-size: clamp(32px, 7vw, 52px);
-    color: var(--gold);
-    direction: rtl;
-    margin-bottom: 24px;
-    position: relative;
-    text-shadow: 0 0 40px rgba(201,168,76,0.3);
-  }
-
-  .hero-sub {
-    font-size: clamp(15px, 2.5vw, 18px);
-    color: var(--muted);
-    max-width: 480px;
-    line-height: 1.7;
-    margin-bottom: 48px;
-    position: relative;
-  }
-
-  /* ── DOWNLOAD BUTTONS ── */
-  .download-row {
-    display: flex; gap: 14px; flex-wrap: wrap;
-    justify-content: center;
-    position: relative;
-    margin-bottom: 48px;
-  }
-
-  .dl-btn {
-    display: inline-block;
-    text-decoration: none;
-    transition: all 0.25s;
-    border-radius: 12px;
-    overflow: hidden;
-    line-height: 0;
-  }
-  .dl-btn:hover { transform: translateY(-3px); box-shadow: 0 14px 36px rgba(0,0,0,0.5); }
-  .dl-btn svg, .dl-btn img { display: block; height: 54px; width: auto; border-radius: 10px; }
-
-  .hero-note {
-    font-size: 11px;
-    color: rgba(28,28,26,0.35);
-    letter-spacing: 0.1em;
-    position: relative;
-  }
-
-  /* ── PHONE MOCKUP ── */
-  .phone-section {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    padding: 80px 24px;
-    background: linear-gradient(180deg, #F5F2EB 0%, #E8E4D9 50%, #F5F2EB 100%);
-    overflow: hidden;
-    position: relative;
-  }
-
-  .phone-section::before {
-    content: '';
-    position: absolute; inset: 0;
-    background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(27,67,50,0.06) 0%, transparent 70%);
-  }
-
-  .phone {
-    width: 160px;
-    background: #FFFFFF;
-    border: 1px solid rgba(160,121,58,0.15);
-    border-radius: 28px;
-    overflow: hidden;
-    box-shadow: 0 20px 48px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.05), 0 0 0 1px rgba(255,255,255,0.05);
-    position: relative;
-    transition: transform 0.4s ease;
-    flex-shrink: 0;
-  }
-
-  .phone:nth-child(2) { transform: translateY(-20px); }
-  .phone:nth-child(3) { transform: translateY(10px); }
-
-  .phone:hover { transform: translateY(-6px) !important; }
-
-  .phone-notch {
-    width: 60px; height: 20px;
-    background: #F8F6F1;
-    border-radius: 0 0 12px 12px;
-    margin: 0 auto;
-    position: relative; z-index: 2;
-  }
-
-  .phone-screen { padding: 12px; }
-
-  .ps-header {
-    padding: 8px 10px;
-    background: linear-gradient(135deg, var(--green), #0D2B1F);
-    border-radius: 12px;
-    margin-bottom: 10px;
-  }
-
-  .ps-label { font-size: 8px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); }
-  .ps-sub   { font-size: 6px; color: var(--muted); }
-
-  .ps-grid { display: grid; grid-template-columns: repeat(6,1fr); gap: 3px; margin-bottom: 8px; }
-  .ps-cell {
-    aspect-ratio: 1; border-radius: 3px;
-    background: rgba(0,0,0,0.04);
-    border: 1px solid rgba(255,255,255,0.05);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 6px; color: var(--muted);
-  }
-  .ps-cell.done    { background: rgba(45,106,79,0.5); border-color: var(--mid); color: #1A1A1A; }
-  .ps-cell.reading { background: rgba(201,168,76,0.15); border-color: var(--gold); color: var(--gold); }
-
-  .ps-bar { height: 3px; background: rgba(0,0,0,0.06); border-radius: 2px; overflow: hidden; margin-bottom: 6px; }
-  .ps-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--mid), var(--gold)); }
-
-  .ps-row { height: 6px; background: rgba(0,0,0,0.06); border-radius: 3px; margin-bottom: 4px; }
-  .ps-row.w60 { width: 60%; }
-  .ps-row.w45 { width: 45%; }
-  .ps-row.gold { background: rgba(160,121,58,0.35); width: 70%; }
-
-  .ps-arabic { font-family: 'Amiri', serif; font-size: 18px; color: var(--gold); direction: rtl; text-align: right; margin-bottom: 4px; }
-
-  .ps-circle {
-    width: 50px; height: 50px; border-radius: 50%;
-    border: 2px solid rgba(201,168,76,0.3);
-    margin: 6px auto;
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 16px; color: var(--gold);
-  }
-
-  .ps-lesson { background: rgba(0,0,0,0.03); border-radius: 8px; padding: 6px 8px; margin-bottom: 5px; display: flex; align-items: center; gap: 6px; }
-  .ps-check { width: 12px; height: 12px; border-radius: 3px; background: var(--mid); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 7px; }
-  .ps-ltext { font-size: 7px; color: var(--muted); line-height: 1.3; }
-
-  /* ── FEATURES ── */
-  .features {
-    padding: 80px 24px;
-    max-width: 960px;
-    margin: 0 auto;
-  }
-
-  .section-eyebrow {
-    font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase;
-    color: var(--gold); margin-bottom: 12px; text-align: center;
-  }
-
-  .section-heading {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(32px, 5vw, 48px);
-    font-weight: 600; text-align: center;
-    color: #1A1A1A; margin-bottom: 8px; line-height: 1.2;
-  }
-
-  .section-sub {
-    text-align: center; color: var(--muted);
-    font-size: 15px; max-width: 420px;
-    margin: 0 auto 56px; line-height: 1.6;
-  }
-
-  .features-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
-  }
-
-  .feature-card {
-    background: #FFFFFF;
-    border: 1px solid rgba(160,121,58,0.15);
-    border-radius: 20px;
-    padding: 28px 24px;
-    transition: all 0.3s;
-  }
-
-  .feature-card:hover {
-    border-color: rgba(160,121,58,0.4);
-    transform: translateY(-4px);
-    box-shadow: 0 16px 40px rgba(0,0,0,0.1);
-  }
-
-  .feature-icon {
-    font-size: 28px; margin-bottom: 16px; display: block;
-  }
-
-  .feature-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 20px; font-weight: 600;
-    color: #1A1A1A; margin-bottom: 8px;
-  }
-
-  .feature-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
-
-  /* ── DIVIDER ── */
-  .divider {
-    width: 60px; height: 1px; margin: 0 auto;
-    background: linear-gradient(90deg, transparent, var(--gold), transparent);
-  }
-
-  /* ── CTA BOTTOM ── */
-  .cta-section {
-    text-align: center;
-    padding: 80px 24px 100px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .cta-section::before {
-    content: '';
-    position: absolute; inset: 0;
-    background: radial-gradient(ellipse 50% 70% at 50% 100%, rgba(27,67,50,0.06) 0%, transparent 70%);
-  }
-
-  .cta-arabic {
-    font-family: 'Amiri', serif;
-    font-size: clamp(20px, 4vw, 28px);
-    color: rgba(201,168,76,0.5);
-    direction: rtl;
-    margin-bottom: 24px;
-    position: relative;
-  }
-
-  .cta-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(36px, 6vw, 56px);
-    font-weight: 600; color: #1A1A1A;
-    margin-bottom: 16px; line-height: 1.15;
-    position: relative;
-  }
-
-  .cta-sub { font-size: 15px; color: var(--muted); margin-bottom: 48px; position: relative; }
-
-  /* ── FOOTER ── */
-  footer {
-    border-top: 1px solid rgba(160,121,58,0.15);
-    padding: 32px 40px;
-    display: flex; align-items: center; justify-content: space-between;
-    flex-wrap: wrap; gap: 16px;
-  }
-
-  .footer-brand { font-family: 'Cormorant Garamond', serif; font-size: 18px; color: rgba(28,28,26,0.5); }
-  .footer-copy  { font-size: 11px; color: rgba(245,240,232,0.2); }
-
-  .footer-links { display: flex; gap: 20px; }
-  .footer-links a { font-size: 12px; color: var(--muted); text-decoration: none; transition: color 0.2s; }
-  .footer-links a:hover { color: var(--gold); }
-
-  /* ── RESPONSIVE ── */
-  @media (max-width: 600px) {
-    nav { padding: 14px 20px; }
-    .nav-cta { display: none; }
-    footer { padding: 24px 20px; flex-direction: column; align-items: flex-start; }
-    .phone:nth-child(3) { display: none; }
-    .phone:nth-child(2) { transform: translateY(-10px); }
-  }
-
-  /* ── DARK THEME ── */
-  body.dark-mode {
-    --dark:   #0A1410;
-    --panel:  #111D17;
-    --card:   #162218;
-    --green:  #1B4332;
-    --mid:    #2D6A4F;
-    --gold:   #C9A84C;
-    --goldL:  #E8CC7A;
-    --cream:  #F5F0E8;
-    --muted:  rgba(245,240,232,0.45);
-    --border: rgba(201,168,76,0.18);
-  }
-  body.dark-mode { background: #0A1410; color: #F5F0E8; }
-  body.dark-mode .hero-title,
-  body.dark-mode .section-heading,
-  body.dark-mode .cta-title,
-  body.dark-mode .feature-title { color: #F5F0E8; }
-  body.dark-mode .hero-note { color: rgba(245,240,232,0.25); }
-  body.dark-mode nav { background: rgba(10,20,16,0.9); border-bottom: 1px solid rgba(201,168,76,0.08); }
-  body.dark-mode .feature-card { background: #162218; border-color: rgba(201,168,76,0.18); }
-  body.dark-mode .feature-card:hover { border-color: rgba(201,168,76,0.4); box-shadow: 0 16px 40px rgba(0,0,0,0.3); }
-  body.dark-mode .phone-section { background: linear-gradient(180deg, #0A1410 0%, #111D17 50%, #0A1410 100%); }
-  body.dark-mode .phone { background: #162218; box-shadow: 0 32px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05); }
-  body.dark-mode .phone-notch { background: #0A1410; }
-  body.dark-mode .ps-row { background: rgba(255,255,255,0.05); }
-  body.dark-mode .ps-row.gold { background: rgba(201,168,76,0.3); }
-  body.dark-mode .ps-bar { background: rgba(255,255,255,0.05); }
-  body.dark-mode .hero-bg {
-    background:
-      radial-gradient(ellipse 60% 50% at 50% 0%, rgba(27,67,50,0.6) 0%, transparent 70%),
-      radial-gradient(ellipse 40% 40% at 80% 80%, rgba(201,168,76,0.06) 0%, transparent 60%);
-  }
-  body.dark-mode .cta-section::before {
-    background: radial-gradient(ellipse 50% 70% at 50% 100%, rgba(27,67,50,0.4) 0%, transparent 70%);
-  }
-  body.dark-mode footer { border-top: 1px solid rgba(201,168,76,0.08); }
-  body.dark-mode .footer-brand { color: rgba(245,240,232,0.4); }
-  body.dark-mode .footer-links a { color: rgba(245,240,232,0.45); }
-  body.dark-mode .dl-btn.apple { background: #000; color: #fff; border-color: transparent; }
-  body.dark-mode .dl-btn.google { background: transparent; color: #F5F0E8; border-color: rgba(201,168,76,0.18); }
-  body.dark-mode .dl-btn.google:hover { border-color: rgba(201,168,76,0.5); }
-  body.dark-mode .watermark { color: rgba(201,168,76,0.04); }
-
-  /* ── THEME TOGGLE BUTTON ── */
-  .theme-toggle {
-    position: fixed;
-    bottom: 28px;
-    right: 24px;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: var(--card);
-    border: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 20px;
-    z-index: 200;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-    transition: all 0.3s ease;
-  }
-  .theme-toggle:hover { transform: scale(1.1); }
-
-  /* ── SMOOTH TRANSITION ── */
-  body, nav, .feature-card, .phone, footer, .phone-section {
-    transition: background 0.6s ease, color 0.6s ease, border-color 0.6s ease;
-  }
-</style>
-</head>
-<body>
-
-<!-- NAV -->
-<nav>
-  <a href="#" class="nav-brand">
-    <div class="nav-icon">
-      <span class="ar">نور</span>
-      <span class="en">Noor</span>
+// ── PHONE SHELL ──
+function Phone({ children, label, sub, tag, tagColor, dark }) {
+  const ink = dark ? DK.ink : G.ink; const muted = dark ? DK.muted : G.muted;
+  return (
+    <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:14 }}>
+      <div style={{ width:"100%", borderRadius:30, background:"#111D17", border:"1.5px solid rgba(201,168,76,0.22)", boxShadow:"0 24px 56px rgba(0,0,0,0.5)", overflow:"hidden" }}>
+        <div style={{ width:60, height:16, background:"#0A1410", borderRadius:"0 0 10px 10px", margin:"0 auto" }} />
+        <div style={{ padding:"8px 11px 14px" }}>{children}</div>
+      </div>
+      <div style={{ textAlign:"center" }}>
+        <div style={{ fontSize:13, fontWeight:600, color:ink, marginBottom:2, fontFamily:"'DM Sans',sans-serif" }}>{label}</div>
+        <div style={{ fontSize:11, color:muted, marginBottom:6, fontFamily:"'DM Sans',sans-serif" }}>{sub}</div>
+        <span style={{ fontSize:9, letterSpacing:"0.14em", textTransform:"uppercase", padding:"3px 10px", borderRadius:10, background:tagColor.bg, color:tagColor.text, border:`1px solid ${tagColor.border}`, fontFamily:"'DM Sans',sans-serif" }}>{tag}</span>
+      </div>
     </div>
-    <span class="nav-wordmark">Noor</span>
-  </a>
-  <a href="#download" class="nav-cta">Download Free</a>
-</nav>
+  );
+}
+function SH({ label, sub, grad }) {
+  return <div style={{ background:grad, borderRadius:10, padding:"8px 10px", marginBottom:8 }}>
+    <div style={{ fontSize:7.5, letterSpacing:"0.18em", textTransform:"uppercase", color:"#C9A84C", fontWeight:600, fontFamily:"'DM Sans',sans-serif" }}>{label}</div>
+    {sub && <div style={{ fontSize:6, color:"rgba(245,240,232,0.4)", marginTop:1, fontFamily:"'DM Sans',sans-serif" }}>{sub}</div>}
+  </div>;
+}
+function PBar({ pct, h=4 }) {
+  return <div style={{ height:h, background:"rgba(255,255,255,0.06)", borderRadius:3, overflow:"hidden", marginBottom:5 }}><div style={{ height:"100%", width:`${pct}%`, background:"linear-gradient(90deg,#2D6A4F,#C9A84C)", borderRadius:3 }} /></div>;
+}
+function PRow({ w="70%", gold }) {
+  return <div style={{ height:5, width:w, background:gold?"rgba(201,168,76,0.28)":"rgba(255,255,255,0.07)", borderRadius:3, marginBottom:4 }} />;
+}
+const TAGS = {
+  ind:{ bg:"rgba(27,67,50,0.2)", text:"#6EE7A0", border:"rgba(45,106,79,0.4)" },
+  fam:{ bg:"rgba(160,121,58,0.2)", text:"#C9A84C", border:"rgba(160,121,58,0.35)" },
+  edu:{ bg:"rgba(37,99,235,0.2)", text:"#93C5FD", border:"rgba(37,99,235,0.35)" },
+  all:{ bg:"rgba(255,255,255,0.1)", text:"rgba(245,240,232,0.65)", border:"rgba(255,255,255,0.15)" },
+};
+const JUZ = Array.from({length:30},(_,i)=>i+1);
 
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-bg"></div>
-  <div class="watermark">نور</div>
+// ── SCROLL REVEAL HOOK ──
+function useReveal() {
+  useEffect(() => {
+    const observe = () => {
+      const els = document.querySelectorAll('.reveal');
+      if (!els.length) return;
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+      }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+      els.forEach(el => io.observe(el));
+      return io;
+    };
+    const io = observe();
+    return () => io && io.disconnect();
+  });
+}
 
-  <div class="hero-badge">
-    <div class="hero-badge-dot"></div>
-    Coming Soon — iOS &amp; Android
-  </div>
+function HomeScreen() {
+  return <>
+    <SH label="نور  NOOR" sub="Your Journey Continues" grad="linear-gradient(135deg,#1B4332,#0D2B1F)" />
+    <div style={{ display:"flex", gap:4, marginBottom:7 }}>
+      {[["12","STREAK 🔥"],["7","JUZ DONE"],["4","LESSONS"]].map(([n,l])=>(
+        <div key={l} style={{ flex:1, background:"rgba(201,168,76,0.07)", border:"1px solid rgba(201,168,76,0.12)", borderRadius:7, padding:"6px 3px", textAlign:"center" }}>
+          <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:16, color:"#C9A84C", lineHeight:1 }}>{n}</div>
+          <div style={{ fontSize:5, color:"rgba(245,240,232,0.4)", marginTop:2, letterSpacing:"0.05em", fontFamily:"'DM Sans',sans-serif" }}>{l}</div>
+        </div>
+      ))}
+    </div>
+    <PBar pct={23} /><PRow gold /><PRow w="65%" /><PRow w="45%" />
+    <div style={{ background:"rgba(201,168,76,0.06)", border:"1px solid rgba(201,168,76,0.12)", borderRadius:7, padding:"7px 9px", marginTop:7 }}>
+      <div style={{ fontFamily:"'Amiri',serif", fontSize:13, color:"#C9A84C", direction:"rtl", marginBottom:2 }}>اقْرَأْ بِاسْمِ رَبِّكَ</div>
+      <div style={{ fontSize:5.5, color:"rgba(245,240,232,0.3)", fontFamily:"'DM Sans',sans-serif" }}>Al-Alaq 96:1 · Daily reminder</div>
+    </div>
+  </>;
+}
+function QuranScreen() {
+  return <>
+    <SH label="Quran Tracker" sub="30 Juz Progress" grad="linear-gradient(135deg,#1B3A2D,#0F2218)" />
+    <div style={{ display:"grid", gridTemplateColumns:"repeat(6,1fr)", gap:3, marginBottom:7 }}>
+      {JUZ.map(j=>(
+        <div key={j} style={{ aspectRatio:"1", borderRadius:4, display:"flex", alignItems:"center", justifyContent:"center", fontSize:6.5, fontFamily:"'DM Sans',sans-serif", background:j<=7?"rgba(45,106,79,0.55)":j<=10?"rgba(201,168,76,0.16)":"rgba(255,255,255,0.03)", border:`1px solid ${j<=7?"#2D6A4F":j<=10?"#C9A84C":"rgba(255,255,255,0.05)"}`, color:j<=7?"#F5F0E8":j<=10?"#C9A84C":"rgba(245,240,232,0.25)" }}>{j}</div>
+      ))}
+    </div>
+    <PBar pct={23} /><PRow w="60%" /><PRow w="45%" />
+  </>;
+}
+function MadarasaScreen() {
+  const items=[{t:"Makharij al-Huruf",b:"TAJWEED",d:true},{t:"Noon Sakinah Rules",b:"TAJWEED",d:true},{t:"Madd Rules",b:"TAJWEED",d:false},{t:"Purification",b:"FIQH",d:true},{t:"Prayer (Salah)",b:"FIQH",d:false},{t:"Birth of the Prophet ﷺ",b:"SEERAH",d:false}];
+  return <>
+    <SH label="Madarasa" sub="Your Lessons" grad="linear-gradient(135deg,#2D3A1B,#1A230D)" />
+    {items.map((l,i)=>(
+      <div key={i} style={{ display:"flex", alignItems:"flex-start", gap:5, padding:"4px 6px", background:"rgba(255,255,255,0.03)", border:"1px solid rgba(255,255,255,0.05)", borderRadius:6, marginBottom:3 }}>
+        <div style={{ width:10, height:10, borderRadius:3, background:l.d?"#2D6A4F":"transparent", border:l.d?"none":"1px solid rgba(255,255,255,0.15)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:6, color:"#fff", flexShrink:0, marginTop:1 }}>{l.d?"✓":""}</div>
+        <div>
+          <div style={{ fontSize:6.5, color:l.d?"rgba(245,240,232,0.75)":"rgba(245,240,232,0.45)", lineHeight:1.3, fontFamily:"'DM Sans',sans-serif" }}>{l.t}</div>
+          <div style={{ fontSize:5, color:"#C9A84C", background:"rgba(201,168,76,0.1)", padding:"1px 4px", borderRadius:3, display:"inline-block", marginTop:1, letterSpacing:"0.08em", fontFamily:"'DM Sans',sans-serif" }}>{l.b}</div>
+        </div>
+      </div>
+    ))}
+    <PBar pct={40} h={3} />
+  </>;
+}
+function DhikrScreen() {
+  return <>
+    <SH label="Daily Dhikr" sub="Tap to count" grad="linear-gradient(135deg,#2B1A38,#170D22)" />
+    <div style={{ fontFamily:"'Amiri',serif", fontSize:20, color:"#C9A84C", direction:"rtl", textAlign:"center", marginBottom:7 }}>سُبْحَانَ اللّٰهِ</div>
+    <div style={{ width:62, height:62, borderRadius:"50%", border:"2.5px solid rgba(201,168,76,0.3)", margin:"0 auto 7px", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center" }}>
+      <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:22, color:"#C9A84C", lineHeight:1 }}>21</div>
+      <div style={{ fontSize:6, color:"rgba(245,240,232,0.35)", fontFamily:"'DM Sans',sans-serif" }}>of 33</div>
+    </div>
+    <PBar pct={64} />
+    <div style={{ fontSize:6, color:"rgba(245,240,232,0.28)", textAlign:"center", marginBottom:7, fontFamily:"'DM Sans',sans-serif" }}>21 of 33 completed</div>
+    {[{t:"SubhanAllah × 33",d:true},{t:"Alhamdulillah × 33",d:false}].map((d,i)=>(
+      <div key={i} style={{ display:"flex", alignItems:"center", gap:5, padding:"4px 6px", background:"rgba(255,255,255,0.03)", border:"1px solid rgba(255,255,255,0.05)", borderRadius:6, marginBottom:3, opacity:d.d?1:0.45 }}>
+        <div style={{ width:10, height:10, borderRadius:3, background:d.d?"#2D6A4F":"transparent", border:d.d?"none":"1px solid rgba(255,255,255,0.15)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:6, color:"#fff", flexShrink:0 }}>{d.d?"✓":""}</div>
+        <div style={{ fontSize:6.5, color:"rgba(245,240,232,0.7)", fontFamily:"'DM Sans',sans-serif" }}>{d.t}</div>
+      </div>
+    ))}
+  </>;
+}
+function KidsScreen() {
+  return <>
+    <SH label="Noor Kids 🌙" sub="Assalamu Alaykum, Ahmed!" grad="linear-gradient(135deg,#0D4A3A,#0A2A22)" />
+    <div style={{ background:"rgba(255,255,255,0.05)", borderRadius:7, padding:"6px 7px", marginBottom:7, display:"flex", alignItems:"center", gap:6 }}>
+      <span style={{ fontSize:16 }}>🔥</span>
+      <div><div style={{ fontSize:6.5, color:"#fff", fontWeight:700, fontFamily:"'DM Sans',sans-serif" }}>5 Day Streak!</div><div style={{ fontSize:5.5, color:"rgba(245,240,232,0.4)", fontFamily:"'DM Sans',sans-serif" }}>Keep going, Ahmed</div></div>
+    </div>
+    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:4, marginBottom:7 }}>
+      {[["📖","Quran","rgba(13,148,136,0.2)","rgba(13,148,136,0.35)"],["⭐","Lessons","rgba(124,58,237,0.2)","rgba(124,58,237,0.35)"],["🤲","Dhikr","rgba(217,119,6,0.2)","rgba(217,119,6,0.35)"],["🏆","Badges","rgba(219,39,119,0.2)","rgba(219,39,119,0.35)"]].map(([icon,label,bg,border])=>(
+        <div key={label} style={{ background:bg, border:`1px solid ${border}`, borderRadius:9, padding:"9px 5px", textAlign:"center" }}>
+          <div style={{ fontSize:18, marginBottom:3 }}>{icon}</div>
+          <div style={{ fontSize:6.5, fontWeight:700, color:"#fff", fontFamily:"'DM Sans',sans-serif" }}>{label}</div>
+        </div>
+      ))}
+    </div>
+    <div style={{ fontSize:6, color:"rgba(245,240,232,0.3)", fontFamily:"'DM Sans',sans-serif", marginBottom:3 }}>4 of 8 surahs memorized</div>
+    <PBar pct={50} />
+  </>;
+}
+function ParentScreen() {
+  return <>
+    <SH label="Parent Dashboard" sub="2 children" grad="linear-gradient(135deg,#1B4332,#0D2B1F)" />
+    {[{e:"👦🏽",n:"Ahmed, 8",a:"Active today",s:5,p:45,l:"4 surahs · 4 lessons"},{e:"👧🏽",n:"Fatima, 11",a:"Active yesterday",s:12,p:80,l:"12 surahs · 8 lessons"}].map((c,i)=>(
+      <div key={i} style={{ background:"rgba(201,168,76,0.06)", border:"1px solid rgba(201,168,76,0.14)", borderRadius:9, padding:"7px", marginBottom:5 }}>
+        <div style={{ display:"flex", alignItems:"center", gap:5, marginBottom:4 }}>
+          <span style={{ fontSize:14 }}>{c.e}</span>
+          <div style={{ flex:1 }}><div style={{ fontSize:6.5, color:"#F5F0E8", fontWeight:600, fontFamily:"'DM Sans',sans-serif" }}>{c.n}</div><div style={{ fontSize:5.5, color:"rgba(245,240,232,0.4)", fontFamily:"'DM Sans',sans-serif" }}>{c.a}</div></div>
+          <div style={{ fontSize:6.5, color:"#C9A84C", fontFamily:"'DM Sans',sans-serif" }}>🔥 {c.s}</div>
+        </div>
+        <PBar pct={c.p} />
+        <div style={{ fontSize:5.5, color:"rgba(245,240,232,0.3)", fontFamily:"'DM Sans',sans-serif" }}>{c.l}</div>
+      </div>
+    ))}
+    <div style={{ background:"rgba(45,106,79,0.15)", border:"1px solid rgba(45,106,79,0.3)", borderRadius:7, padding:"5px 7px", fontSize:6, color:"rgba(245,240,232,0.5)", fontFamily:"'DM Sans',sans-serif" }}>📊 Weekly report sent every Sunday</div>
+  </>;
+}
+function TeacherScreen() {
+  return <>
+    <SH label="Sunday Madarasa" sub="Level 2 · 8 students" grad="linear-gradient(135deg,#1B3A5F,#0F1E38)" />
+    <div style={{ display:"flex", gap:4, marginBottom:7 }}>
+      {[["5","DONE","rgba(52,211,153,0.1)","rgba(52,211,153,0.25)","#34D399"],["2","IN PROG","rgba(201,168,76,0.1)","rgba(201,168,76,0.25)","#C9A84C"],["1","NOT START","rgba(229,115,115,0.1)","rgba(229,115,115,0.25)","#E57373"]].map(([n,l,bg,border,col])=>(
+        <div key={l} style={{ flex:1, background:bg, border:`1px solid ${border}`, borderRadius:6, padding:"4px 2px", textAlign:"center" }}>
+          <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:14, color:col, lineHeight:1 }}>{n}</div>
+          <div style={{ fontSize:5, color:"rgba(245,240,232,0.4)", fontFamily:"'DM Sans',sans-serif", letterSpacing:"0.03em" }}>{l}</div>
+        </div>
+      ))}
+    </div>
+    {[{e:"👦🏽",n:"Ahmed Hassan",p:100,s:"done"},{e:"👧🏽",n:"Fatima Omar",p:80,s:"prog"},{e:"👦🏾",n:"Omar Shire",p:0,s:"nudge"}].map((s,i)=>(
+      <div key={i} style={{ display:"flex", alignItems:"center", gap:5, padding:"4px 6px", background:"rgba(255,255,255,0.03)", border:"1px solid rgba(255,255,255,0.05)", borderRadius:7, marginBottom:3 }}>
+        <span style={{ fontSize:13, flexShrink:0 }}>{s.e}</span>
+        <div style={{ flex:1 }}>
+          <div style={{ fontSize:6.5, color:"rgba(245,240,232,0.8)", fontFamily:"'DM Sans',sans-serif" }}>{s.n}</div>
+          <div style={{ height:3, background:"rgba(255,255,255,0.05)", borderRadius:2, overflow:"hidden", marginTop:2 }}><div style={{ height:"100%", width:`${s.p}%`, background:s.p===100?"#34D399":"linear-gradient(90deg,#2D6A4F,#C9A84C)", borderRadius:2 }} /></div>
+        </div>
+        {s.s==="done"&&<span style={{ fontSize:7, color:"#34D399" }}>✓</span>}
+        {s.s==="prog"&&<span style={{ fontSize:6.5, color:"#C9A84C", fontFamily:"'DM Sans',sans-serif" }}>80%</span>}
+        {s.s==="nudge"&&<span style={{ fontSize:6, color:"#E57373", background:"rgba(229,115,115,0.1)", padding:"1px 4px", borderRadius:3, fontFamily:"'DM Sans',sans-serif", flexShrink:0 }}>Nudge</span>}
+      </div>
+    ))}
+  </>;
+}
+function LangScreen() {
+  const langs=[{f:"🇺🇸",n:"English",nat:null,act:true,rtl:false,soon:false},{f:"🇸🇦",n:"Arabic",nat:"العربية",act:false,rtl:true,soon:false},{f:"🇸🇴",n:"Somali",nat:"Soomaali",act:false,rtl:false,soon:false},{f:"🇵🇰",n:"Urdu",nat:"اردو",act:false,rtl:true,soon:true},{f:"🇫🇷",n:"French",nat:"Français",act:false,rtl:false,soon:true}];
+  return <>
+    <SH label="Settings" sub="Language & Preferences" grad="linear-gradient(135deg,#1B4332,#0D2B1F)" />
+    <div style={{ fontSize:6, letterSpacing:"0.15em", textTransform:"uppercase", color:"#C9A84C", marginBottom:5, fontFamily:"'DM Sans',sans-serif", fontWeight:600 }}>Language</div>
+    {langs.map((l,i)=>(
+      <div key={i} style={{ display:"flex", alignItems:"center", gap:6, padding:"6px 7px", background:l.act?"rgba(201,168,76,0.08)":"rgba(255,255,255,0.02)", border:`1px solid ${l.act?"rgba(201,168,76,0.28)":"rgba(255,255,255,0.04)"}`, borderRadius:7, marginBottom:3, opacity:l.soon?0.45:1 }}>
+        <span style={{ fontSize:12 }}>{l.f}</span>
+        <div style={{ flex:1 }}>
+          <div style={{ fontSize:6.5, color:l.act?"#F5F0E8":"rgba(245,240,232,0.6)", fontFamily:"'DM Sans',sans-serif" }}>{l.n}</div>
+          {l.nat&&<div style={{ fontSize:5.5, color:"rgba(245,240,232,0.35)", fontFamily:"'DM Sans',sans-serif" }}>{l.nat}</div>}
+        </div>
+        {l.act&&<span style={{ fontSize:7.5, color:"#C9A84C" }}>✓</span>}
+        {l.rtl&&!l.act&&<span style={{ fontSize:5, color:"#C9A84C", background:"rgba(201,168,76,0.1)", padding:"1px 4px", borderRadius:3, fontFamily:"'DM Sans',sans-serif" }}>RTL</span>}
+        {l.soon&&<span style={{ fontSize:5, color:"rgba(245,240,232,0.3)", fontFamily:"'DM Sans',sans-serif" }}>SOON</span>}
+      </div>
+    ))}
+  </>;
+}
 
-  <h1 class="hero-title">Illuminate Your<br>Islamic Journey</h1>
-  <div class="hero-arabic">نور</div>
-  <p class="hero-sub">Track your Quran reading, complete Madarasa lessons, and build daily dhikr habits — all in one beautiful app.</p>
+// ── SVG ICONS ──
+const LIIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>;
+const WebIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>;
+const MailIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,6 12,13 22,6"/></svg>;
 
-  <div class="download-row" id="download">
-    <a href="#" class="dl-btn apple">
-      <svg height="54" viewBox="0 0 180 54" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="54" rx="10" fill="#000"/><rect width="180" height="54" rx="10" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1"/><path d="M29.5 13.5c2.2-2.8 1.9-5.8 1.9-5.8s-2.9.2-4.9 2.3c-1.7 1.9-2.1 4.5-2.1 4.5s2.9.1 5.1-2zm1.3 3.2c-2.9 0-5.2 1.7-6.6 1.7-1.5 0-3.6-1.6-6-1.6-3 0-6.2 1.8-7.9 4.8-3.3 5.8-.9 14.4 2.3 19 1.6 2.3 3.6 4.9 6.2 4.8 2.4-.1 3.4-1.6 6.4-1.6 3 0 3.8 1.6 6.4 1.5 2.7 0 4.4-2.3 6-4.7 1.9-2.7 2.7-5.2 2.7-5.3-.1 0-5.1-2-5.1-7.7 0-4.8 3.9-7.1 4.1-7.2-2.3-3.4-5.8-3.7-6.1-3.7" fill="#fff" transform="scale(0.75) translate(4,4)"/><text x="50" y="21" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="11" fill="rgba(255,255,255,0.65)">Download on the</text><text x="50" y="38" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="19" font-weight="600" fill="#fff">App Store</text></svg>
+// ── DOWNLOAD BUTTON ──
+function DlBtn({ type }) {
+  const isApple = type === "apple";
+  return (
+    <a href="#" style={{ display:"inline-block", textDecoration:"none", borderRadius:12, overflow:"hidden", lineHeight:0, transition:"transform 0.25s" }}
+      onMouseOver={e=>e.currentTarget.style.transform="translateY(-3px)"}
+      onMouseOut={e=>e.currentTarget.style.transform="translateY(0)"}>
+      <svg height="54" viewBox={isApple?"0 0 180 54":"0 0 195 54"} xmlns="http://www.w3.org/2000/svg">
+        {isApple?<>
+          <rect width="180" height="54" rx="10" fill="#000"/>
+          <rect width="180" height="54" rx="10" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1"/>
+          <path d="M29.5 13.5c2.2-2.8 1.9-5.8 1.9-5.8s-2.9.2-4.9 2.3c-1.7 1.9-2.1 4.5-2.1 4.5s2.9.1 5.1-2zm1.3 3.2c-2.9 0-5.2 1.7-6.6 1.7-1.5 0-3.6-1.6-6-1.6-3 0-6.2 1.8-7.9 4.8-3.3 5.8-.9 14.4 2.3 19 1.6 2.3 3.6 4.9 6.2 4.8 2.4-.1 3.4-1.6 6.4-1.6 3 0 3.8 1.6 6.4 1.5 2.7 0 4.4-2.3 6-4.7 1.9-2.7 2.7-5.2 2.7-5.3-.1 0-5.1-2-5.1-7.7 0-4.8 3.9-7.1 4.1-7.2-2.3-3.4-5.8-3.7-6.1-3.7" fill="#fff" transform="scale(0.75) translate(4,4)"/>
+          <text x="50" y="21" fontFamily="-apple-system,sans-serif" fontSize="11" fill="rgba(255,255,255,0.65)">Download on the</text>
+          <text x="50" y="38" fontFamily="-apple-system,sans-serif" fontSize="19" fontWeight="600" fill="#fff">App Store</text>
+        </>:<>
+          <rect width="195" height="54" rx="10" fill="#1c1c1c"/>
+          <rect width="195" height="54" rx="10" fill="none" stroke="rgba(160,121,58,0.3)" strokeWidth="1"/>
+          <defs><linearGradient id="pg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#00bcd4"/><stop offset="50%" stopColor="#4caf50"/><stop offset="100%" stopColor="#ffeb3b"/></linearGradient></defs>
+          <polygon points="18,14 18,40 33,27" fill="url(#pg)" transform="translate(6,0)"/>
+          <text x="52" y="21" fontFamily="-apple-system,sans-serif" fontSize="11" fill="rgba(245,240,232,0.55)">Get it on</text>
+          <text x="52" y="38" fontFamily="-apple-system,sans-serif" fontSize="19" fontWeight="600" fill="#F5F0E8">Google Play</text>
+        </>}
+      </svg>
     </a>
-    <a href="#" class="dl-btn google">
-      <svg height="54" viewBox="0 0 195 54" xmlns="http://www.w3.org/2000/svg"><rect width="195" height="54" rx="10" fill="#2D2D2D"/><rect width="195" height="54" rx="10" fill="none" stroke="rgba(201,168,76,0.3)" stroke-width="1"/><defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#00bcd4"/><stop offset="50%" stop-color="#4caf50"/><stop offset="100%" stop-color="#ffeb3b"/></linearGradient></defs><polygon points="18,14 18,40 33,27" fill="url(#g1)" transform="translate(6,0)"/><text x="52" y="21" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="11" fill="rgba(245,240,232,0.55)">Get it on</text><text x="52" y="38" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="19" font-weight="600" fill="#F5F0E8">Google Play</text></svg>
-    </a>
-  </div>
-
-  <p class="hero-note">Free to download · No account required to start</p>
-</section>
-
-<!-- PHONE MOCKUPS -->
-<section class="phone-section">
-
-  <!-- Screen 1: Home -->
-  <div class="phone">
-    <div class="phone-notch"></div>
-    <div class="phone-screen">
-      <div class="ps-header">
-        <div class="ps-label">نور &nbsp; Noor</div>
-        <div class="ps-sub">Your Journey Continues</div>
-      </div>
-      <div style="display:flex;gap:6px;margin-bottom:8px">
-        <div style="flex:1;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.12);border-radius:8px;padding:8px;text-align:center">
-          <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:#C9A84C">12</div>
-          <div style="font-size:6px;color:rgba(245,240,232,0.4)">Streak 🔥</div>
-        </div>
-        <div style="flex:1;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.12);border-radius:8px;padding:8px;text-align:center">
-          <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:#C9A84C">7</div>
-          <div style="font-size:6px;color:rgba(245,240,232,0.4)">Juz Done</div>
-        </div>
-        <div style="flex:1;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.12);border-radius:8px;padding:8px;text-align:center">
-          <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:#C9A84C">4</div>
-          <div style="font-size:6px;color:rgba(245,240,232,0.4)">Lessons</div>
-        </div>
-      </div>
-      <div class="ps-bar"><div class="ps-fill" style="width:23%"></div></div>
-      <div class="ps-row gold"></div>
-      <div class="ps-row w60"></div>
-      <div class="ps-row w45"></div>
-    </div>
-  </div>
-
-  <!-- Screen 2: Quran -->
-  <div class="phone">
-    <div class="phone-notch"></div>
-    <div class="phone-screen">
-      <div class="ps-header">
-        <div class="ps-label">Quran Tracker</div>
-        <div class="ps-sub">30 Juz Progress</div>
-      </div>
-      <div class="ps-grid">
-        <div class="ps-cell done">1</div><div class="ps-cell done">2</div><div class="ps-cell done">3</div><div class="ps-cell done">4</div><div class="ps-cell done">5</div><div class="ps-cell done">6</div><div class="ps-cell done">7</div><div class="ps-cell reading">8</div><div class="ps-cell reading">9</div><div class="ps-cell reading">10</div><div class="ps-cell">11</div><div class="ps-cell">12</div><div class="ps-cell">13</div><div class="ps-cell">14</div><div class="ps-cell">15</div><div class="ps-cell">16</div><div class="ps-cell">17</div><div class="ps-cell">18</div><div class="ps-cell">19</div><div class="ps-cell">20</div><div class="ps-cell">21</div><div class="ps-cell">22</div><div class="ps-cell">23</div><div class="ps-cell">24</div><div class="ps-cell">25</div><div class="ps-cell">26</div><div class="ps-cell">27</div><div class="ps-cell">28</div><div class="ps-cell">29</div><div class="ps-cell">30</div>
-      </div>
-      <div class="ps-bar"><div class="ps-fill" style="width:23%"></div></div>
-      <div class="ps-row w60" style="margin-top:6px"></div>
-    </div>
-  </div>
-
-  <!-- Screen 3: Dhikr -->
-  <div class="phone">
-    <div class="phone-notch"></div>
-    <div class="phone-screen">
-      <div class="ps-header">
-        <div class="ps-label">Daily Dhikr</div>
-        <div class="ps-sub">Tap to count</div>
-      </div>
-      <div class="ps-arabic">سُبْحَانَ اللّٰهِ</div>
-      <div class="ps-circle">21</div>
-      <div class="ps-bar"><div class="ps-fill" style="width:64%"></div></div>
-      <div style="font-size:7px;color:rgba(245,240,232,0.3);text-align:center;margin-top:4px">21 of 33</div>
-      <div class="ps-lesson" style="margin-top:8px">
-        <div class="ps-check">✓</div>
-        <div class="ps-ltext">SubhanAllah × 33</div>
-      </div>
-    </div>
-  </div>
-
-</section>
-
-<!-- FEATURES -->
-<section class="features">
-  <p class="section-eyebrow">What's Inside</p>
-  <h2 class="section-heading">Everything for Your<br>Daily Practice</h2>
-  <p class="section-sub">Built for Muslims who want a simple, beautiful way to stay consistent.</p>
-
-  <div class="features-grid">
-    <div class="feature-card">
-      <span class="feature-icon">◈</span>
-      <div class="feature-title">Quran Tracker</div>
-      <p class="feature-desc">Mark each juz as unread, in progress, or complete. Visual progress ring keeps you motivated through all 30 juz.</p>
-    </div>
-    <div class="feature-card">
-      <span class="feature-icon">✦</span>
-      <div class="feature-title">Madarasa</div>
-      <p class="feature-desc">Structured lessons in Tajweed, Fiqh, Seerah, and Arabic. Learn at your own pace with progress tracking by subject.</p>
-    </div>
-    <div class="feature-card">
-      <span class="feature-icon">◯</span>
-      <div class="feature-title">Dhikr Counter</div>
-      <p class="feature-desc">Digital tasbih for your daily adhkar. Tap through SubhanAllah, Alhamdulillah, Allahu Akbar and more with session logs.</p>
-    </div>
-    <div class="feature-card">
-      <span class="feature-icon">🔥</span>
-      <div class="feature-title">Streak Tracking</div>
-      <p class="feature-desc">Build consistent habits with daily streaks. Your progress is saved so you never lose your momentum.</p>
-    </div>
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- BOTTOM CTA -->
-<section class="cta-section">
-  <div class="cta-arabic">اقْرَأْ بِاسْمِ رَبِّكَ</div>
-  <h2 class="cta-title">Start Your Journey<br>Today</h2>
-  <p class="cta-sub">Free on iOS and Android.</p>
-
-  <!-- Mobile: single smart button -->
-  <div id="mobile-download" style="display:none; flex-direction:column; align-items:center; gap:12px; position:relative;">
-    <a id="smart-btn" href="#"
-      style="display:inline-flex;align-items:center;gap:14px;padding:16px 36px;border-radius:16px;text-decoration:none;font-family:'DM Sans',sans-serif;font-size:17px;font-weight:600;transition:all 0.25s;">
-      <span id="smart-icon" style="font-size:28px"></span>
-      <span>
-        <span style="display:block;font-size:11px;opacity:0.7;letter-spacing:0.05em" id="smart-line1"></span>
-        <span id="smart-line2"></span>
-      </span>
-    </a>
-    <p style="font-size:12px;color:rgba(245,240,232,0.3);margin-top:4px">Tap to go directly to the store</p>
-  </div>
-
-  <!-- Desktop: both badges + QR code -->
-  <div id="desktop-download" style="display:none; flex-direction:column; align-items:center; gap:28px;">
-    <div class="download-row">
-      <a id="apple-btn-cta" href="#" class="dl-btn apple">
-        <svg height="54" viewBox="0 0 180 54" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="54" rx="10" fill="#000"/><rect width="180" height="54" rx="10" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1"/><path d="M29.5 13.5c2.2-2.8 1.9-5.8 1.9-5.8s-2.9.2-4.9 2.3c-1.7 1.9-2.1 4.5-2.1 4.5s2.9.1 5.1-2zm1.3 3.2c-2.9 0-5.2 1.7-6.6 1.7-1.5 0-3.6-1.6-6-1.6-3 0-6.2 1.8-7.9 4.8-3.3 5.8-.9 14.4 2.3 19 1.6 2.3 3.6 4.9 6.2 4.8 2.4-.1 3.4-1.6 6.4-1.6 3 0 3.8 1.6 6.4 1.5 2.7 0 4.4-2.3 6-4.7 1.9-2.7 2.7-5.2 2.7-5.3-.1 0-5.1-2-5.1-7.7 0-4.8 3.9-7.1 4.1-7.2-2.3-3.4-5.8-3.7-6.1-3.7" fill="#fff" transform="scale(0.75) translate(4,4)"/><text x="50" y="21" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="11" fill="rgba(255,255,255,0.65)">Download on the</text><text x="50" y="38" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="19" font-weight="600" fill="#fff">App Store</text></svg>
-      </a>
-      <a id="google-btn-cta" href="#" class="dl-btn google">
-        <svg height="54" viewBox="0 0 195 54" xmlns="http://www.w3.org/2000/svg"><rect width="195" height="54" rx="10" fill="#2D2D2D"/><rect width="195" height="54" rx="10" fill="none" stroke="rgba(201,168,76,0.3)" stroke-width="1"/><defs><linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#00bcd4"/><stop offset="50%" stop-color="#4caf50"/><stop offset="100%" stop-color="#ffeb3b"/></linearGradient></defs><polygon points="18,14 18,40 33,27" fill="url(#g2)" transform="translate(6,0)"/><text x="52" y="21" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="11" fill="rgba(245,240,232,0.55)">Get it on</text><text x="52" y="38" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="19" font-weight="600" fill="#F5F0E8">Google Play</text></svg>
-      </a>
-    </div>
-
-    <!-- QR Code section -->
-    <div style="display:flex;align-items:center;gap:32px;background:rgba(255,255,255,0.03);border:1px solid rgba(201,168,76,0.15);border-radius:20px;padding:24px 32px;flex-wrap:wrap;justify-content:center;">
-      <!-- QR code SVG (generated to point to noor.mmohamud.me) -->
-      <div style="background:#fff;border-radius:12px;padding:12px;display:flex;align-items:center;justify-content:center;">
-        <canvas id="qr-canvas" width="120" height="120"></canvas>
-      </div>
-      <div style="max-width:200px;">
-        <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--cream);margin-bottom:6px;">Scan to Download</div>
-        <div style="font-size:12px;color:var(--muted);line-height:1.6;">Point your phone camera at the QR code. It detects your device and takes you straight to the right store.</div>
-        <div style="margin-top:12px;display:flex;gap:8px;align-items:center;">
-          <div style="width:8px;height:8px;border-radius:50%;background:var(--gold);"></div>
-          <span style="font-size:11px;color:rgba(245,240,232,0.4);letter-spacing:0.1em;">noor.mmohamud.me</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- FOOTER -->
-<footer>
-  <span class="footer-brand">Noor · نور</span>
-  <div class="footer-links">
-    <a href="#">Privacy</a>
-    <a href="#">Contact</a>
-  </div>
-  <span class="footer-copy">© 2026 Noor. All rights reserved.</span>
-</footer>
-
-
-<!-- THEME TOGGLE -->
-<button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
-
-<script>
-// ── TIME-BASED THEME ──
-// Light mode: 5am - 7pm (Fajr to Maghrib)
-// Dark mode:  7pm - 5am (Maghrib to Fajr)
-
-const APPLE_URL_2  = "https://apps.apple.com/app/noor/id000000000";
-const GOOGLE_URL_2 = "https://play.google.com/store/apps/details?id=com.kulangroup.noor";
-
-function getThemeByTime() {
-  const hour = new Date().getHours();
-  return (hour >= 5 && hour < 19) ? 'light' : 'dark';
+  );
 }
 
-function applyTheme(theme, manual = false) {
-  const body   = document.body;
-  const toggle = document.getElementById('theme-toggle');
-  if (theme === 'dark') {
-    body.classList.add('dark-mode');
-    if (toggle) toggle.textContent = '☀️';
-    if (toggle) toggle.title = 'Switch to light mode';
-  } else {
-    body.classList.remove('dark-mode');
-    if (toggle) toggle.textContent = '🌙';
-    if (toggle) toggle.title = 'Switch to dark mode';
+// ── MAIN APP ──
+export default function NoorApp() {
+  const [page, setPage] = useState("home");
+  const [dark, setDark] = useState(() => { const saved = localStorage.getItem("noor-theme"); return saved ? saved === "dark" : true; });
+  const [faqOpen, setFaqOpen] = useState(null);
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileNav, setMobileNav] = useState(false);
+  const [waitEmail, setWaitEmail] = useState("");
+  const [waitDone, setWaitDone] = useState(false);
+  const [contactForm, setContactForm] = useState({ name:"", org:"", email:"", msg:"" });
+  const [contactDone, setContactDone] = useState(false);
+  const [countdown, setCountdown] = useState({ d:0, h:0, m:0, s:0 });
+  const [pageAnim, setPageAnim] = useState(true);
+
+  const T = dark ? DK : G;
+  useReveal();
+
+  // countdown to Aug 31 2026
+  // Set OG meta tags
+  useEffect(() => {
+    document.title = "Noor — Islamic Learning App";
+    const setMeta = (name, content, prop=false) => {
+      let el = document.querySelector(`meta[${prop?"property":"name"}="${name}"]`);
+      if (!el) { el = document.createElement("meta"); el.setAttribute(prop?"property":"name", name); document.head.appendChild(el); }
+      el.setAttribute("content", content);
+    };
+    setMeta("description", "The clean, ad-free Islamic app. Quran tracking, structured lessons, and daily dhikr. Free forever for individuals.");
+    setMeta("og:title", "Noor — Islamic Learning App", true);
+    setMeta("og:description", "The clean, ad-free Islamic app built for the Muslim diaspora. Free forever for individuals.", true);
+    setMeta("og:url", "https://noor.mmohamud.me", true);
+    setMeta("og:type", "website", true);
+    setMeta("twitter:card", "summary_large_image");
+    setMeta("twitter:title", "Noor — Islamic Learning App");
+    setMeta("twitter:description", "The clean, ad-free Islamic app built for the Muslim diaspora.");
+  }, []);
+
+  useEffect(() => {
+    const target = new Date("2026-08-31T00:00:00");
+    const tick = () => {
+      const diff = target - new Date();
+      if (diff <= 0) return;
+      setCountdown({ d:Math.floor(diff/86400000), h:Math.floor((diff%86400000)/3600000), m:Math.floor((diff%3600000)/60000), s:Math.floor((diff%60000)/1000) });
+    };
+    tick(); const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 80);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  function goPage(p) {
+    setPageAnim(false);
+    setTimeout(() => { setPage(p); setPageAnim(true); setMobileNav(false); window.scrollTo({top:0,behavior:"smooth"}); }, 150);
   }
-  if (manual) localStorage.setItem('noor-theme-override', theme);
-}
 
-function toggleTheme() {
-  const isDark = document.body.classList.contains('dark-mode');
-  applyTheme(isDark ? 'light' : 'dark', true);
-}
-
-// On load — check for manual override, else use time
-const override = localStorage.getItem('noor-theme-override');
-const autoTheme = getThemeByTime();
-
-// Apply immediately before render to prevent flash
-if (override) {
-  applyTheme(override);
-} else {
-  applyTheme(autoTheme);
-}
-
-// Show the current theme info in console
-const hour = new Date().getHours();
-const period = (hour >= 5 && hour < 19) ? 'Day (Light)' : 'Night (Dark)';
-console.log(`Noor — Time-based theme: ${period} (${hour}:00) | Override: ${override || 'none'}`);
-
-// Auto-switch check every minute
-setInterval(() => {
-  if (!localStorage.getItem('noor-theme-override')) {
-    applyTheme(getThemeByTime());
-  }
-}, 60000);
-</script>
-
-<script src="https://analytics.kulaninstitute.org/tracker.js" data-site-id="Noor" async></script>
-
-<script>
-// ── STORE URLS (replace with real links after App Store approval) ──
-const APPLE_URL  = "https://apps.apple.com/app/noor/id000000000";
-const GOOGLE_URL = "https://play.google.com/store/apps/details?id=com.kulangroup.noor";
-const SITE_URL   = "https://noor.mmohamud.me";
-
-// ── DEVICE DETECTION ──
-const ua = navigator.userAgent || navigator.vendor || window.opera;
-const isIOS     = /iPhone|iPad|iPod/i.test(ua);
-const isAndroid = /Android/i.test(ua);
-const isMobile  = isIOS || isAndroid;
-
-// ── UPDATE ALL HERO BUTTONS ──
-document.querySelectorAll('#apple-btn-cta, .dl-btn.apple').forEach(el => el.href = APPLE_URL);
-document.querySelectorAll('#google-btn-cta, .dl-btn.google').forEach(el => el.href = GOOGLE_URL);
-
-if (isMobile) {
-  // Show single smart button
-  const mobileDiv = document.getElementById('mobile-download');
-  mobileDiv.style.display = 'flex';
-
-  const btn      = document.getElementById('smart-btn');
-  const icon     = document.getElementById('smart-icon');
-  const line1    = document.getElementById('smart-line1');
-  const line2    = document.getElementById('smart-line2');
-
-  if (isIOS) {
-    btn.href             = APPLE_URL;
-    btn.style.background = '#000';
-    btn.style.color      = '#fff';
-    btn.style.border     = '1px solid rgba(255,255,255,0.2)';
-    icon.textContent     = '🍎';
-    line1.textContent    = 'Download on the';
-    line2.textContent    = 'App Store';
-  } else {
-    btn.href             = GOOGLE_URL;
-    btn.style.background = '#1c1c1c';
-    btn.style.color      = '#F5F0E8';
-    btn.style.border     = '1px solid rgba(201,168,76,0.3)';
-    icon.textContent     = '▶';
-    line1.textContent    = 'Get it on';
-    line2.textContent    = 'Google Play';
-  }
-} else {
-  // Show desktop version with both badges + QR code
-  document.getElementById('desktop-download').style.display = 'flex';
-
-  // ── QR CODE (pure JS — no library needed) ──
-  // Simple QR-like visual using canvas that points to noor.mmohamud.me
-  // For production: replace with a real QR code library like qrcode.js
-  const canvas = document.getElementById('qr-canvas');
-  const ctx    = canvas.getContext('2d');
-  const size   = 120;
-  const cell   = size / 21;
-
-  // A simplified representative QR pattern (production: use qrcodejs)
-  // This is a visual placeholder — use the real URL QR in production
-  const modules = [
-    [1,1,1,1,1,1,1,0,1,0,1,0,1,0,1,1,1,1,1,1,1],
-    [1,0,0,0,0,0,1,0,0,1,0,1,0,0,1,0,0,0,0,0,1],
-    [1,0,1,1,1,0,1,0,1,0,1,0,1,0,1,0,1,1,1,0,1],
-    [1,0,1,1,1,0,1,0,0,1,1,1,0,0,1,0,1,1,1,0,1],
-    [1,0,1,1,1,0,1,0,1,0,0,1,1,0,1,0,1,1,1,0,1],
-    [1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,1],
-    [1,1,1,1,1,1,1,0,1,0,1,0,1,0,1,1,1,1,1,1,1],
-    [0,0,0,0,0,0,0,0,1,1,0,1,1,0,0,0,0,0,0,0,0],
-    [1,0,1,1,0,1,1,1,0,1,1,0,1,1,1,0,1,0,1,1,0],
-    [0,1,0,0,1,0,0,0,1,0,0,1,0,1,0,1,0,1,0,0,1],
-    [1,1,0,1,0,1,1,0,1,1,0,1,1,0,1,1,0,1,0,1,0],
-    [0,0,1,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,1,0,1],
-    [1,0,1,1,0,1,1,0,1,0,1,1,0,1,1,0,1,1,0,1,0],
-    [0,0,0,0,0,0,0,0,1,0,0,1,0,1,0,0,1,0,1,1,0],
-    [1,1,1,1,1,1,1,0,0,1,1,0,1,0,1,0,0,1,0,0,1],
-    [1,0,0,0,0,0,1,0,1,0,0,1,0,0,0,1,1,0,1,0,0],
-    [1,0,1,1,1,0,1,0,0,1,1,0,1,1,1,0,0,1,0,1,1],
-    [1,0,1,1,1,0,1,0,1,0,0,1,0,1,0,1,1,0,1,0,0],
-    [1,0,1,1,1,0,1,0,0,1,1,0,1,0,1,0,0,1,0,1,1],
-    [1,0,0,0,0,0,1,0,1,0,0,1,0,0,0,1,1,0,0,0,0],
-    [1,1,1,1,1,1,1,0,0,1,1,0,1,1,1,0,0,1,1,1,0],
+  const faqs = [
+    ["Is Noor really free forever?","Yes. Layer 1 is free forever with no ads and no data selling. The Quran Tracker, Madarasa lessons, Dhikr Counter, and core features will never go behind a paywall."],
+    ["Does Noor sell user data?","Never. Noor does not sell, share, or monetize user data with any third party. Your progress and personal information belong to you."],
+    ["Does it work without internet?","Yes. Noor is built offline-first. Progress, lessons, and dhikr all work without a connection and sync quietly when you reconnect."],
+    ["What languages does Noor support?","English, Arabic, and Somali at launch with full right-to-left layout for Arabic. Urdu and French are coming in Phase 2."],
+    ["What happens when a trial expires?","Your account goes read-only. You can still view everything but cannot create new assignments. Data is kept for 90 days. A child's Quran progress is never deleted."],
+    ["Can teachers use Noor for a madarasa?","Yes, that is exactly who the Education tier was built for. Teachers create a class, students join with a code, and the teacher assigns surahs, duas, stories, and quizzes."],
+    ["When does Noor launch?","Noor is targeting August 2026 for its App Store and Google Play release. Join the waitlist to be notified the moment it goes live."],
   ];
 
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, size, size);
+  const mockups = [
+    { screen:<HomeScreen />,    label:"Home Dashboard",    sub:"Streak, progress and daily ayah",   tag:"Individual", tagColor:TAGS.ind },
+    { screen:<QuranScreen />,   label:"Quran Tracker",     sub:"All 30 juz with status tracking",  tag:"Individual", tagColor:TAGS.ind },
+    { screen:<MadarasaScreen />,label:"Madarasa Lessons",  sub:"Tajweed, Fiqh, Seerah and Arabic", tag:"Individual", tagColor:TAGS.ind },
+    { screen:<DhikrScreen />,   label:"Dhikr Counter",     sub:"Daily adhkar with progress ring",  tag:"Individual", tagColor:TAGS.ind },
+    { screen:<KidsScreen />,    label:"Kids Mode",         sub:"Age-appropriate content",          tag:"Family",     tagColor:TAGS.fam },
+    { screen:<ParentScreen />,  label:"Parent Dashboard",  sub:"Track every child's progress",     tag:"Family",     tagColor:TAGS.fam },
+    { screen:<TeacherScreen />, label:"Teacher Dashboard", sub:"Class management for madarasas",   tag:"Education",  tagColor:TAGS.edu },
+    { screen:<LangScreen />,    label:"Language Settings", sub:"8 languages across 3 phases",      tag:"All Users",  tagColor:TAGS.all },
+  ];
 
-  modules.forEach((row, r) => {
-    row.forEach((mod, c) => {
-      if (mod) {
-        ctx.fillStyle = '#0A1410';
-        ctx.fillRect(
-          Math.round(c * cell),
-          Math.round(r * cell),
-          Math.ceil(cell),
-          Math.ceil(cell)
-        );
-      }
-    });
-  });
+  // ── SHARED STYLES ──
+  const navBg = dark ? "rgba(10,20,16,0.94)" : "rgba(238,233,223,0.94)";
+  const ey = { fontSize:11, letterSpacing:"0.25em", textTransform:"uppercase", color:T.gold, marginBottom:12, textAlign:"center", fontFamily:"'DM Sans',sans-serif" };
+  const st = { fontFamily:"'Cormorant Garamond',serif", fontSize:"clamp(30px,5vw,50px)", fontWeight:600, textAlign:"center", color:T.ink, marginBottom:12, lineHeight:1.2, letterSpacing:"-0.01em" };
+  const ss = { textAlign:"center", color:T.muted, fontSize:16, maxWidth:480, margin:"0 auto 52px", lineHeight:1.7, fontFamily:"'DM Sans',sans-serif", letterSpacing:"0.01em" };
+  const sec = { padding:"88px 24px", background:T.bg };
+  const secP = { padding:"88px 24px", background:T.panel };
+  const inn = { maxWidth:960, margin:"0 auto" };
+  const cardS = { background:T.card, border:`1px solid ${T.border}`, borderRadius:20, padding:"30px 26px" };
+  const inputS = { width:"100%", padding:"13px 16px", background:T.card, border:`1px solid ${T.border}`, borderRadius:12, color:T.ink, fontSize:14, fontFamily:"'DM Sans',sans-serif", outline:"none" };
+  const btnGreen = { background:G.green, color:"#fff", padding:"13px 28px", borderRadius:12, border:"none", fontSize:14, fontWeight:600, cursor:"pointer", fontFamily:"'DM Sans',sans-serif", transition:"opacity 0.2s" };
 
-  // Add Noor icon overlay in center
-  ctx.fillStyle = '#1B4332';
-  const cx = size / 2;
-  const cy = size / 2;
-  ctx.beginPath();
-  ctx.arc(cx, cy, cell * 2, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = '#C9A84C';
-  ctx.font = `bold ${Math.round(cell * 2.2)}px Georgia`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('ن', cx, cy + 1);
+  function FeatureCard({ icon, title, desc, tag, tagStyle }) {
+    return (
+      <div className="reveal card-hover"
+        style={{ ...cardS, position:"relative", overflow:"hidden" }}>
+
+        <div style={{ fontSize:28, marginBottom:16 }}>{icon}</div>
+        <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:21, fontWeight:600, color:T.ink, marginBottom:9 }}>{title}</div>
+        <div style={{ fontSize:14, color:T.muted, lineHeight:1.7, marginBottom:14, fontFamily:"'DM Sans',sans-serif" }}>{desc}</div>
+        <span style={{ fontSize:10, letterSpacing:"0.14em", textTransform:"uppercase", padding:"3px 10px", borderRadius:10, ...tagStyle, fontFamily:"'DM Sans',sans-serif" }}>{tag}</span>
+      </div>
+    );
+  }
+
+  function PricingCard({ badge, badgeStyle, name, price, note, desc, features, ctaLabel, ctaStyle, featured }) {
+    return (
+      <div className={`reveal card-hover`} style={{ background:featured?G.green:T.card, border:`1px solid ${featured?G.green:T.border}`, borderRadius:22, padding:"34px 26px" }}>
+        <span style={{ fontSize:10, letterSpacing:"0.14em", textTransform:"uppercase", padding:"3px 10px", borderRadius:10, display:"inline-block", marginBottom:14, ...badgeStyle, fontFamily:"'DM Sans',sans-serif" }}>{badge}</span>
+        <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:24, fontWeight:600, color:featured?"#fff":T.ink, marginBottom:4 }}>{name}</div>
+        <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:42, fontWeight:600, lineHeight:1, marginBottom:4, color:featured?"#E8CC7A":G.green }}>{price}</div>
+        <div style={{ fontSize:12, color:featured?"rgba(255,255,255,0.5)":T.muted, marginBottom:14, fontFamily:"'DM Sans',sans-serif" }}>{note}</div>
+        <div style={{ fontSize:13, color:featured?"rgba(255,255,255,0.7)":T.muted, lineHeight:1.6, marginBottom:18, fontFamily:"'DM Sans',sans-serif" }}>{desc}</div>
+        <div style={{ height:1, background:featured?"rgba(255,255,255,0.12)":T.border, marginBottom:18 }} />
+        {features.map((f,i)=>(
+          <div key={i} style={{ fontSize:13, color:featured?"rgba(255,255,255,0.8)":T.muted, padding:"4px 0", fontFamily:"'DM Sans',sans-serif" }}>
+            <span style={{ color:featured?"#E8CC7A":G.mid, fontWeight:700, marginRight:6 }}>✓</span>{f}
+          </div>
+        ))}
+        <a href="#" style={{ display:"block", textAlign:"center", marginTop:22, padding:12, borderRadius:12, fontSize:14, fontWeight:600, textDecoration:"none", fontFamily:"'DM Sans',sans-serif", ...ctaStyle }}>{ctaLabel}</a>
+      </div>
+    );
+  }
+
+  // ── RENDER ──
+  return (
+    <div style={{ background:T.bg, color:T.ink, fontFamily:"'DM Sans',sans-serif", minHeight:"100vh", transition:"background 0.5s, color 0.4s", opacity:pageAnim?1:0, transitionProperty:"background,color,opacity" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Amiri:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        ::-webkit-scrollbar { display: none; }
+        body { -webkit-font-smoothing: antialiased; }
+
+        /* ── KEYFRAMES ── */
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes countPop { 0%{transform:scale(1)} 50%{transform:scale(1.06)} 100%{transform:scale(1)} }
+
+        @keyframes gradMove {
+          0%   { background-position: 0% 50%; }
+          50%  { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        @keyframes orbFloat1 {
+          0%,100% { transform: translate(0px, 0px) scale(1); }
+          33%     { transform: translate(40px, -30px) scale(1.04); }
+          66%     { transform: translate(-20px, 20px) scale(0.97); }
+        }
+        @keyframes orbFloat2 {
+          0%,100% { transform: translate(0px, 0px) scale(1); }
+          33%     { transform: translate(-35px, 25px) scale(1.03); }
+          66%     { transform: translate(25px, -20px) scale(0.98); }
+        }
+        @keyframes orbFloat3 {
+          0%,100% { transform: translate(0px, 0px); }
+          50%     { transform: translate(20px, -30px); }
+        }
+        @keyframes shimmerSlide {
+          0%   { left: -100%; }
+          100% { left: 200%; }
+        }
+        @keyframes revealFade {
+          from { opacity: 0; transform: translateY(18px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── HERO ANIMATED GRADIENT ── */
+        .hero-dark-bg {
+          background: linear-gradient(
+            -45deg,
+            #060E08,
+            #0A1A10,
+            #0D2B1F,
+            #1B4332,
+            #0D2318,
+            #060E08
+          );
+          background-size: 400% 400%;
+          animation: gradMove 14s ease infinite;
+        }
+
+        /* ── NOISE TEXTURE ── */
+        .noise-overlay::before {
+          content: '';
+          position: fixed;
+          inset: 0;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+          opacity: 0.028;
+          pointer-events: none;
+          z-index: 9999;
+        }
+
+        /* ── GRADIENT TEXT ── */
+        .grad-text {
+          background: linear-gradient(135deg, #F0EBE0 0%, #E8CC7A 45%, #C9A84C 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          display: inline-block;
+        }
+
+        /* ── REVEAL ON SCROLL ── */
+        .reveal {
+          opacity: 0;
+          transform: translateY(16px);
+          transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1),
+                      transform 0.7s cubic-bezier(0.16,1,0.3,1);
+          will-change: opacity, transform;
+        }
+        .reveal.in { opacity: 1; transform: translateY(0); }
+
+        /* ── CARD HOVER (no layout shift) ── */
+        /* Rule: never transform grid children. Use box-shadow + border only */
+        .card-hover {
+          transition:
+            box-shadow 0.3s ease,
+            border-color 0.3s ease !important;
+          position: relative;
+          overflow: hidden;
+          cursor: default;
+        }
+        .card-hover:hover {
+          box-shadow:
+            0 0 0 1px rgba(201,168,76,0.35),
+            0 8px 24px rgba(0,0,0,0.18),
+            0 0 40px rgba(201,168,76,0.1) !important;
+          border-color: rgba(201,168,76,0.4) !important;
+        }
+
+        /* ── SHIMMER on hover (top edge sweep) ── */
+        .card-hover::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 60%;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(201,168,76,0.8), transparent);
+          transition: none;
+          pointer-events: none;
+        }
+        .card-hover:hover::after {
+          animation: shimmerSlide 0.6s ease forwards;
+        }
+
+        /* ── GLOW BUTTON ── */
+        .btn-glow {
+          transition: box-shadow 0.3s ease, opacity 0.2s ease, transform 0.2s ease !important;
+        }
+        .btn-glow:hover {
+          box-shadow: 0 0 24px rgba(27,67,50,0.5), 0 6px 20px rgba(0,0,0,0.2) !important;
+          transform: translateY(-2px) !important;
+        }
+
+        /* ── DOWNLOAD BTN HOVER ── */
+        .dl-hover {
+          transition: transform 0.25s ease, box-shadow 0.3s ease !important;
+        }
+        .dl-hover:hover {
+          transform: translateY(-3px) !important;
+          box-shadow: 0 8px 28px rgba(0,0,0,0.25) !important;
+        }
+
+        /* ── STAGGER DELAYS ── */
+        .reveal:nth-child(1) { transition-delay: 0s; }
+        .reveal:nth-child(2) { transition-delay: 0.07s; }
+        .reveal:nth-child(3) { transition-delay: 0.14s; }
+        .reveal:nth-child(4) { transition-delay: 0.21s; }
+        .reveal:nth-child(5) { transition-delay: 0.28s; }
+        .reveal:nth-child(6) { transition-delay: 0.35s; }
+
+        /* ── MOBILE ── */
+        @media(max-width:768px) {
+          .nav-links { display: none !important; }
+          .mobile-menu-btn { display: flex !important; }
+          .footer-grid { grid-template-columns: 1fr 1fr !important; }
+          .mockup-grid { grid-template-columns: repeat(2,1fr) !important; }
+          .steps-grid { grid-template-columns: 1fr !important; }
+          .pricing-grid { grid-template-columns: 1fr !important; }
+          .contact-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
+
+      {/* ── NAV ── */}
+      <nav style={{ position:"fixed", top:0, left:0, right:0, zIndex:300, display:"flex", alignItems:"center", justifyContent:"space-between", padding:"15px 40px", background:navBg, backdropFilter:"blur(20px)", borderBottom:`1px solid ${T.border}`, transition:"background 0.4s" }}>
+        <div style={{ display:"flex", alignItems:"center", gap:10, cursor:"pointer" }} onClick={()=>goPage("home")}>
+          <div style={{ width:32, height:32, borderRadius:8, background:"linear-gradient(135deg,#1B4332,#0D2B1F)", border:"1px solid rgba(201,168,76,0.35)", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center" }}>
+            <span style={{ fontFamily:"'Amiri',serif", fontSize:14, color:"#C9A84C", lineHeight:1 }}>نور</span>
+            <span style={{ fontSize:5, color:"rgba(245,240,232,0.4)", letterSpacing:"0.2em" }}>NOOR</span>
+          </div>
+          <span style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:20, fontWeight:600, color:T.ink }}>Noor</span>
+        </div>
+        <div className="nav-links" style={{ display:"flex", alignItems:"center", gap:26 }}>
+          {[["home","Home"],["products","Products"],["company","Company"],["legal","Legal"]].map(([k,l])=>(
+            <button key={k} onClick={()=>goPage(k)} style={{ fontSize:13, color:page===k?G.green:T.muted, fontWeight:page===k?600:400, background:"none", border:"none", cursor:"pointer", fontFamily:"'DM Sans',sans-serif", transition:"color 0.2s" }}>{l}</button>
+          ))}
+          <button onClick={()=>goPage("home")} className="btn-glow" style={{ background:G.green, color:"#fff", padding:"8px 20px", borderRadius:20, fontSize:13, fontWeight:500, border:"none", cursor:"pointer", fontFamily:"'DM Sans',sans-serif" }}>Download Free</button>
+        </div>
+        <button className="mobile-menu-btn" onClick={()=>setMobileNav(v=>!v)} style={{ display:"none", flexDirection:"column", gap:5, background:"none", border:`1px solid ${T.border}`, borderRadius:8, padding:"8px 10px", cursor:"pointer" }}>
+          <div style={{ width:18, height:1.5, background:T.ink }} /><div style={{ width:18, height:1.5, background:T.ink }} /><div style={{ width:18, height:1.5, background:T.ink }} />
+        </button>
+      </nav>
+
+      {/* ── MOBILE NAV OVERLAY ── */}
+      {mobileNav && (
+        <div style={{ position:"fixed", inset:0, zIndex:299, background:T.bg, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:24, padding:40 }}>
+          {[["home","Home"],["products","Products"],["company","Company"],["legal","Legal"]].map(([k,l])=>(
+            <button key={k} onClick={()=>goPage(k)} style={{ fontSize:28, fontFamily:"'Cormorant Garamond',serif", color:T.ink, background:"none", border:"none", cursor:"pointer" }}>{l}</button>
+          ))}
+          <button onClick={()=>goPage("home")} style={{ ...btnGreen, marginTop:8 }}>Download Free</button>
+        </div>
+      )}
+
+      {/* ── PAGE CONTENT ── */}
+      {page === "home" && (
+        <>
+          {/* HERO */}
+          <section className={dark ? "hero-dark-bg noise-overlay" : "noise-overlay"} style={{ minHeight:"100vh", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", textAlign:"center", padding:"140px 24px 80px", position:"relative", overflow:"hidden", background: dark ? undefined : "linear-gradient(180deg, rgba(27,67,50,0.06) 0%, transparent 40%)" }}>
+            {!dark && <div style={{ position:"absolute", inset:0, background:"radial-gradient(ellipse 70% 60% at 50% 0%, rgba(27,67,50,0.07) 0%, transparent 70%)", pointerEvents:"none" }} />}
+            {/* ORBS */}
+            <div style={{ position:"absolute", width:600, height:600, borderRadius:"50%", background:"radial-gradient(circle, rgba(27,67,50,0.22) 0%, transparent 70%)", top:"-20%", left:"-10%", animation:"orbFloat1 18s ease-in-out infinite", pointerEvents:"none" }} />
+            <div style={{ position:"absolute", width:500, height:500, borderRadius:"50%", background:"radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%)", bottom:"-15%", right:"-10%", animation:"orbFloat2 22s ease-in-out infinite", pointerEvents:"none" }} />
+            <div style={{ position:"absolute", width:300, height:300, borderRadius:"50%", background:"radial-gradient(circle, rgba(45,106,79,0.15) 0%, transparent 70%)", top:"40%", right:"15%", animation:"orbFloat3 16s ease-in-out infinite", pointerEvents:"none" }} />
+            <div style={{ position:"absolute", fontFamily:"'Amiri',serif", fontSize:"clamp(200px,40vw,360px)", color:dark?"rgba(201,168,76,0.04)":"rgba(27,67,50,0.04)", top:"50%", left:"50%", transform:"translate(-50%,-50%)", lineHeight:1, pointerEvents:"none", userSelect:"none" }}>نور</div>
+
+            <div style={{ display:"inline-flex", alignItems:"center", gap:6, background:dark?"rgba(45,106,79,0.15)":"rgba(27,67,50,0.07)", border:`1px solid ${dark?"rgba(45,106,79,0.3)":"rgba(27,67,50,0.14)"}`, borderRadius:20, padding:"6px 16px", fontSize:11, letterSpacing:"0.2em", textTransform:"uppercase", color:G.mid, marginBottom:28, position:"relative", fontFamily:"'DM Sans',sans-serif" }}>
+              <div style={{ width:6, height:6, borderRadius:"50%", background:G.mid, animation:"pulse 2s infinite" }} /> Coming Soon on iOS and Android
+            </div>
+
+            <h1 className={dark ? "grad-text" : ""} style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:"clamp(50px,10vw,86px)", fontWeight:600, lineHeight:1.05, letterSpacing:"-0.02em", color:dark?"transparent":T.ink, marginBottom:8, position:"relative" }}>
+              Illuminate Your<br />Islamic Journey
+            </h1>
+            <div style={{ fontFamily:"'Amiri',serif", fontSize:"clamp(34px,7vw,54px)", color:T.gold, direction:"rtl", marginBottom:24, position:"relative" }}>نور</div>
+            <p style={{ fontSize:"clamp(15px,2.5vw,17px)", color:T.muted, maxWidth:500, lineHeight:1.7, marginBottom:40, position:"relative", fontFamily:"'DM Sans',sans-serif" }}>
+              The clean, ad-free Islamic app that brings together Quran tracking, structured learning, and daily dhikr. Built for the Muslim diaspora.
+            </p>
+            <div style={{ display:"flex", gap:24, flexWrap:"wrap", justifyContent:"center", marginBottom:44, position:"relative" }}>
+              {["Zero ads. Ever.","Works offline.","Free forever for individuals.","Your data stays yours."].map(p=>(
+                <div key={p} style={{ display:"flex", alignItems:"center", gap:6, fontSize:13, color:T.muted, fontFamily:"'DM Sans',sans-serif" }}><span style={{ color:G.mid, fontWeight:700 }}>✓</span>{p}</div>
+              ))}
+            </div>
+            <div style={{ display:"flex", gap:12, flexWrap:"wrap", justifyContent:"center", marginBottom:20, position:"relative" }}>
+              <DlBtn type="apple" /><DlBtn type="google" />
+            </div>
+            <div style={{ fontSize:11, color:dark?"rgba(245,240,232,0.25)":"rgba(26,26,24,0.3)", letterSpacing:"0.1em", position:"relative", fontFamily:"'DM Sans',sans-serif" }}>Free to download. No account required to get started.</div>
+          </section>
+
+          {/* COUNTDOWN */}
+          <div style={{ background:G.green, padding:"44px 24px" }}>
+            <div style={{ maxWidth:900, margin:"0 auto", textAlign:"center" }}>
+              <div style={{ fontSize:11, letterSpacing:"0.25em", textTransform:"uppercase", color:"rgba(255,255,255,0.45)", marginBottom:20, fontFamily:"'DM Sans',sans-serif" }}>Launching In</div>
+              <div style={{ display:"flex", gap:16, justifyContent:"center", flexWrap:"wrap", marginBottom:28 }}>
+                {[["d","Days"],["h","Hours"],["m","Minutes"],["s","Seconds"]].map(([k,l])=>(
+                  <div key={k} style={{ textAlign:"center", minWidth:72 }}>
+                    <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:"clamp(36px,6vw,52px)", color:"#fff", lineHeight:1, animation:"countPop 1s ease" }}>{String(countdown[k]).padStart(2,"0")}</div>
+                    <div style={{ fontSize:10, color:"rgba(255,255,255,0.45)", letterSpacing:"0.15em", textTransform:"uppercase", marginTop:4, fontFamily:"'DM Sans',sans-serif" }}>{l}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ display:"flex", gap:48, justifyContent:"center", flexWrap:"wrap", paddingTop:20, borderTop:"1px solid rgba(255,255,255,0.12)" }}>
+                {[["1.8B","Muslims Worldwide"],["150K+","Somali Diaspora in N. America"],["0","Ads. Ever."],["3","Launch Languages"]].map(([n,l],i,arr)=>(
+                  <div key={n} style={{ textAlign:"center" }}>
+                    <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:34, color:"#fff", lineHeight:1 }}>{n}</div>
+                    <div style={{ fontSize:11, color:"rgba(255,255,255,0.45)", letterSpacing:"0.08em", marginTop:4, fontFamily:"'DM Sans',sans-serif" }}>{l}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* MOCKUPS */}
+          <div style={{ background:dark?"#060E0A":"#0C1A11", padding:"88px 24px 72px" }}>
+            <div style={{ maxWidth:960, margin:"0 auto" }}>
+              <p style={{ ...ey, color:"#C9A84C" }}>See It In Action</p>
+              <h2 style={{ ...st, color:"#F5F0E8", marginBottom:8 }}>Every Screen, Every Audience</h2>
+              <p style={{ ...ss, color:"rgba(245,240,232,0.45)", marginBottom:44 }}>From personal practice to family learning to classroom management.</p>
+              <div className="mockup-grid" style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:24, alignItems:"start" }}>
+                {mockups.map((m,i)=>(
+                  <div key={i} className="reveal">
+                    <Phone label={m.label} sub={m.sub} tag={m.tag} tagColor={m.tagColor} dark={dark}>{m.screen}</Phone>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* WAITLIST */}
+          <div style={{ background:dark?"#0F1F19":"#EAE4D8", padding:"72px 24px" }}>
+            <div style={{ maxWidth:560, margin:"0 auto", textAlign:"center" }}>
+              <p className="reveal" style={ey}>Early Access</p>
+              <h2 className="reveal" style={{ ...st, fontSize:"clamp(28px,4vw,42px)" }}>Be First When Noor Launches</h2>
+              <p style={{ ...ss, marginBottom:32, fontSize:15 }}>Join the waitlist. No spam. Just a single email the day Noor goes live on iOS and Android.</p>
+              {waitDone ? (
+                <div style={{ background:dark?"rgba(45,106,79,0.2)":"rgba(27,67,50,0.08)", border:`1px solid ${dark?"rgba(45,106,79,0.35)":"rgba(27,67,50,0.2)"}`, borderRadius:16, padding:"24px", animation:"fadeUp 0.4s ease" }}>
+                  <div style={{ fontSize:32, marginBottom:8 }}>✓</div>
+                  <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:22, color:T.ink, marginBottom:6 }}>You're on the list</div>
+                  <div style={{ fontSize:14, color:T.muted, fontFamily:"'DM Sans',sans-serif" }}>We'll email you the moment Noor launches. JazakAllahu khayran.</div>
+                </div>
+              ) : (
+                <div style={{ display:"flex", gap:10, maxWidth:480, margin:"0 auto", flexWrap:"wrap" }}>
+                  <input value={waitEmail} onChange={e=>setWaitEmail(e.target.value)} placeholder="Your email address" type="email"
+                    style={{ ...inputS, flex:1, minWidth:200 }} />
+                  <button onClick={async ()=>{
+                if(!waitEmail.includes("@")) return;
+                try {
+                  await fetch("https://formspree.io/f/xpqnbqpe", {
+                    method:"POST",
+                    headers:{"Content-Type":"application/json"},
+                    body:JSON.stringify({ email: waitEmail, _subject: "New Noor Waitlist Signup" })
+                  });
+                } catch(e) {}
+                setWaitDone(true);
+              }} style={{ ...btnGreen, padding:"13px 24px" }}>Join Waitlist</button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* FEATURES */}
+          <section style={sec}>
+            <div style={inn}>
+              <p className="reveal" style={ey}>What's Inside</p>
+              <h2 className="reveal" style={st}>Everything for Your Daily Practice</h2>
+              <p style={ss}>Built for Muslims who want a simple, honest way to stay consistent without ads interrupting their worship.</p>
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(270px,1fr))", gap:18, isolation:"isolate", alignItems:"start", alignItems:"start" }}>
+                <FeatureCard icon="◈" title="Quran Tracker" desc="Track all 30 juz with a visual progress ring, reading history, and streak system. Mark each juz as unread, in progress, or complete." tag="Free Forever" tagStyle={{ background:"rgba(27,67,50,0.08)", color:G.green, border:"1px solid rgba(27,67,50,0.15)" }} />
+                <FeatureCard icon="✦" title="Madarasa" desc="Structured bite-sized lessons covering Tajweed, Fiqh, Seerah, and Arabic. Progress tracked by subject so you always know where you stand." tag="Free Forever" tagStyle={{ background:"rgba(27,67,50,0.08)", color:G.green, border:"1px solid rgba(27,67,50,0.15)" }} />
+                <FeatureCard icon="◯" title="Dhikr Counter" desc="A clean digital tasbih for your daily adhkar. Tap through SubhanAllah, Alhamdulillah, and Allahu Akbar with a progress ring and session log." tag="Free Forever" tagStyle={{ background:"rgba(27,67,50,0.08)", color:G.green, border:"1px solid rgba(27,67,50,0.15)" }} />
+                <FeatureCard icon="👨‍👩‍👧" title="Family Mode" desc="Parents create child profiles with age-appropriate content. Kids get Prophet stories, short surahs, and a badge system. Parents see everything from one dashboard." tag="Noor Family" tagStyle={{ background:"rgba(154,114,53,0.08)", color:T.gold, border:`1px solid ${T.border}` }} />
+                <FeatureCard icon="🏫" title="Madarasa Platform" desc="Teachers create classes, assign surahs and lessons, build custom curricula, and track every student. Replaces WhatsApp groups and paper systems." tag="Noor Education" tagStyle={{ background:"rgba(37,99,235,0.08)", color:"#1D4ED8", border:"1px solid rgba(37,99,235,0.15)" }} />
+                <FeatureCard icon="📶" title="Fully Offline" desc="Noor works without an internet connection. Quran progress, lessons, and dhikr are all available offline and sync quietly when you reconnect." tag="Free Forever" tagStyle={{ background:"rgba(27,67,50,0.08)", color:G.green, border:"1px solid rgba(27,67,50,0.15)" }} />
+              </div>
+            </div>
+          </section>
+
+          {/* HOW IT WORKS */}
+          <section style={secP}>
+            <div style={inn}>
+              <p className="reveal" style={ey}>Getting Started</p>
+              <h2 className="reveal" style={st}>Up and Running in Minutes</h2>
+              <p style={ss}>No complicated setup. No forced account creation. Open the app and start.</p>
+              <div className="steps-grid" style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:0, maxWidth:800, margin:"0 auto", position:"relative" }}>
+                <div style={{ position:"absolute", top:36, left:"16%", right:"16%", height:1, background:`linear-gradient(90deg,transparent,${T.border},${T.border},transparent)` }} />
+                {[["1","Download Noor","Free on iOS and Android. No credit card required."],["2","Set Your Path","Answer three questions about your level, goal, and daily time. Noor builds your learning path."],["3","Learn Every Day","Track your Quran, complete lessons, and count your dhikr. Your streak keeps you coming back."]].map(([n,t,d])=>(
+                  <div key={n} style={{ textAlign:"center", padding:"0 20px" }}>
+                    <div style={{ width:72, height:72, borderRadius:"50%", background:T.card, border:`2px solid ${T.border}`, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 18px", fontFamily:"'Cormorant Garamond',serif", fontSize:28, color:G.green, position:"relative", zIndex:1, boxShadow:"0 4px 16px rgba(0,0,0,0.06)" }}>{n}</div>
+                    <div style={{ fontSize:16, fontWeight:600, color:T.ink, marginBottom:8, fontFamily:"'DM Sans',sans-serif" }}>{t}</div>
+                    <div style={{ fontSize:13, color:T.muted, lineHeight:1.6, fontFamily:"'DM Sans',sans-serif" }}>{d}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* PRICING */}
+          <section style={sec} id="pricing">
+            <div style={inn}>
+              <p className="reveal" style={ey}>Pricing</p>
+              <h2 className="reveal" style={st}>Simple and Honest</h2>
+              <p style={ss}>Layer 1 is free forever with no ads and no data selling. Paid layers launch at Month 4 with a free trial and no card required.</p>
+              <div className="pricing-grid" style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(250px,1fr))", gap:18, isolation:"isolate", alignItems:"start", alignItems:"start" }}>
+                <PricingCard badge="Free Forever" badgeStyle={{ background:"rgba(27,67,50,0.08)", color:G.green, border:"1px solid rgba(27,67,50,0.15)" }} name="Individual" price="$0" note="Always free. No catch." desc="Everything a Muslim needs for personal daily practice." features={["Quran Tracker (30 juz)","Madarasa lessons","Dhikr Counter","Streak tracking","English, Arabic and Somali","Full offline support"]} ctaLabel="Download Free" ctaStyle={{ background:"transparent", color:T.ink, border:`1px solid ${T.border}` }} />
+                <PricingCard featured badge="14-Day Free Trial" badgeStyle={{ background:"rgba(255,255,255,0.12)", color:"#fff", border:"1px solid rgba(255,255,255,0.2)" }} name="Noor Family" price="$4.99" note="per month or $39.99 per year" desc="For parents building their children's Islamic education at home." features={["Everything in Individual","Kids Mode with age-based content","Parent Dashboard","Assign surahs and lessons","Weekly progress reports","Unlimited child profiles"]} ctaLabel="Start Free Trial" ctaStyle={{ background:"#fff", color:G.green }} />
+                <PricingCard badge="30-Day Free Trial" badgeStyle={{ background:"rgba(37,99,235,0.08)", color:"#1D4ED8", border:"1px solid rgba(37,99,235,0.15)" }} name="Noor Education" price="$9.99" note="per teacher per month. $29.99 flat for madarasas." desc="For teachers and Islamic schools ready to move beyond WhatsApp groups." features={["Everything in Individual","Teacher Dashboard","Class management","Assignment flow","Curriculum Builder","Community curricula"]} ctaLabel="Start Free Trial" ctaStyle={{ background:G.green, color:"#fff" }} />
+              </div>
+              <p style={{ textAlign:"center", fontSize:12, color:T.muted, marginTop:22, fontFamily:"'DM Sans',sans-serif" }}>No credit card required to start any trial. Data is never deleted when a trial expires.</p>
+            </div>
+          </section>
+
+          {/* TESTIMONIALS PLACEHOLDER */}
+          <section style={secP}>
+            <div style={inn}>
+              <p className="reveal" style={ey}>Community</p>
+              <h2 className="reveal" style={st}>What People Are Saying</h2>
+              <p style={ss}>Noor is in development. These spots are reserved for beta testers from our community.</p>
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))", gap:18, isolation:"isolate", alignItems:"start" }}>
+                {[["Parent, US","Somali diaspora"],["Sunday School Teacher","Minnesota"],["Student, UK","British Muslim community"]].map(([role,loc])=>(
+                  <div key={role} style={{ ...cardS, opacity:0.55 }}>
+                    <div style={{ display:"flex", gap:4, marginBottom:14 }}>
+                      {[...Array(5)].map((_,i)=><span key={i} style={{ fontSize:14, color:T.gold }}>★</span>)}
+                    </div>
+                    <div style={{ height:8, background:T.border, borderRadius:4, marginBottom:6, width:"90%" }} />
+                    <div style={{ height:8, background:T.border, borderRadius:4, marginBottom:6, width:"75%" }} />
+                    <div style={{ height:8, background:T.border, borderRadius:4, marginBottom:18, width:"60%" }} />
+                    <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                      <div style={{ width:36, height:36, borderRadius:"50%", background:T.border }} />
+                      <div>
+                        <div style={{ height:7, background:T.border, borderRadius:3, width:80, marginBottom:4 }} />
+                        <div style={{ fontSize:11, color:T.muted, fontFamily:"'DM Sans',sans-serif" }}>{role} · {loc}</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p style={{ textAlign:"center", fontSize:12, color:T.muted, marginTop:20, fontFamily:"'DM Sans',sans-serif" }}>Beta testing begins August 2026. Interested? <span onClick={()=>goPage("company")} style={{ color:G.green, cursor:"pointer", textDecoration:"underline" }}>Contact us.</span></p>
+            </div>
+          </section>
+
+          {/* FAQ */}
+          <section style={sec}>
+            <div style={inn}>
+              <p className="reveal" style={ey}>Questions</p>
+              <h2 className="reveal" style={st}>FAQ</h2>
+              <p style={ss}>Straight answers to the questions we hear most.</p>
+              <div style={{ maxWidth:680, margin:"0 auto" }}>
+                {faqs.map(([q,a],i)=>(
+                  <div key={i} style={{ borderBottom:`1px solid ${T.border}`, padding:"20px 0", cursor:"pointer" }} onClick={()=>setFaqOpen(faqOpen===i?null:i)}>
+                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", gap:16, fontSize:15, fontWeight:500, color:T.ink, fontFamily:"'DM Sans',sans-serif" }}>
+                      {q}
+                      <span style={{ fontSize:18, color:T.gold, transition:"transform 0.3s", transform:faqOpen===i?"rotate(45deg)":"none", flexShrink:0 }}>+</span>
+                    </div>
+                    {faqOpen===i && <div style={{ fontSize:14, color:T.muted, lineHeight:1.7, paddingTop:12, fontFamily:"'DM Sans',sans-serif", animation:"fadeUp 0.3s ease" }}>{a}</div>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* FINAL CTA */}
+          <section style={{ background:G.green, textAlign:"center", padding:"88px 24px", position:"relative", overflow:"hidden" }}>
+            <div style={{ position:"absolute", inset:0, fontFamily:"'Amiri',serif", fontSize:380, color:"rgba(255,255,255,0.025)", display:"flex", alignItems:"center", justifyContent:"center", lineHeight:1, pointerEvents:"none" }}>نور</div>
+            <div style={{ fontFamily:"'Amiri',serif", fontSize:24, color:"rgba(255,255,255,0.35)", marginBottom:18 }}>اقْرَأْ بِاسْمِ رَبِّكَ الَّذِي خَلَقَ</div>
+            <h2 style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:"clamp(34px,6vw,58px)", fontWeight:600, color:"#fff", marginBottom:14, lineHeight:1.15 }}>Start Your Journey Today</h2>
+            <p style={{ fontSize:16, color:"rgba(255,255,255,0.6)", marginBottom:44, fontFamily:"'DM Sans',sans-serif" }}>Free on iOS and Android. No account required.</p>
+            <div style={{ display:"flex", gap:12, flexWrap:"wrap", justifyContent:"center" }}><DlBtn type="apple" /><DlBtn type="google" /></div>
+          </section>
+        </>
+      )}
+
+      {/* ── PRODUCTS ── */}
+      {page === "products" && (
+        <>
+          <div style={{ padding:"140px 48px 64px", background:`linear-gradient(180deg,${dark?"rgba(27,67,50,0.14)":"rgba(27,67,50,0.06)"} 0%,transparent 100%)`, textAlign:"center" }}>
+            <div style={ey}>What We Build</div>
+            <h1 style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:"clamp(38px,6vw,62px)", fontWeight:600, color:T.ink, lineHeight:1.1 }}>Noor Products</h1>
+            <p style={{ fontSize:16, color:T.muted, maxWidth:520, margin:"14px auto 0", lineHeight:1.7, fontFamily:"'DM Sans',sans-serif" }}>Three layers of the same app, each built for a different kind of user. One account connects all three.</p>
+          </div>
+          <div style={{ maxWidth:860, margin:"0 auto", padding:"0 24px 88px" }}>
+            {[["نور","Noor","In Development","The full Islamic learning app. Quran Tracker, Madarasa, Dhikr, Kids Mode, Teacher Dashboard, and Curriculum Builder. Launching August 2026.","gold"],["🛡","Kulan Institute","Live","Bilingual cybersecurity and AI education platform. Courses, certifications, and a live classroom.","green"],["🎨","Kulan Studio","Live","Digital agency offering web design, branding, and content creation for small businesses and community organizations.","green"],["💼","Kulan Careers","Live","Job board connecting diaspora talent with employers in tech, security, and business.","green"]].map(([icon,name,status,desc,color])=>(
+              <div key={name} style={{ ...cardS, marginBottom:18, display:"flex", gap:20, alignItems:"flex-start" }}>
+                <div style={{ fontSize:32, flexShrink:0, fontFamily:"'Amiri',serif", color:T.gold }}>{icon}</div>
+                <div style={{ flex:1 }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:8 }}>
+                    <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:24, fontWeight:600, color:T.ink }}>{name}</div>
+                    <span style={{ fontSize:10, letterSpacing:"0.14em", textTransform:"uppercase", padding:"3px 10px", borderRadius:10, fontFamily:"'DM Sans',sans-serif", background:status==="Live"?"rgba(27,67,50,0.08)":"rgba(154,114,53,0.08)", color:status==="Live"?G.green:T.gold, border:`1px solid ${status==="Live"?"rgba(27,67,50,0.15)":T.border}` }}>{status}</span>
+                  </div>
+                  <div style={{ fontSize:14, color:T.muted, lineHeight:1.7, fontFamily:"'DM Sans',sans-serif" }}>{desc}</div>
+                </div>
+              </div>
+            ))}
+
+            <div style={{ ...cardS, marginBottom:18 }}>
+              <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:24, fontWeight:600, color:T.ink, marginBottom:18 }}>Feature Roadmap</div>
+              {[["Phase 1 — Launch",["Quran Tracker","Madarasa lessons","Dhikr Counter","Streak tracking","EN / AR / SO languages","Full offline support"]],["Phase 2 — Post Launch",["Kids Mode and Parent Dashboard","Teacher Dashboard and assignments","Quran audio recitation","Dua library","Prayer tracker","Urdu and French"]],["Phase 3 — Growth",["Curriculum Builder","Community curricula","Weekly Khatm groups","Quran memorization tools","Somali content library"]],["Phase 4 — Scale",["AI Tajweed Coach","Zakat Calculator","Apple Watch widget","Scholar-verified content","Institutional licensing"]]].map(([phase,items])=>(
+                <div key={phase} style={{ marginBottom:24 }}>
+                  <div style={{ fontSize:14, fontWeight:600, color:T.ink, marginBottom:10, fontFamily:"'DM Sans',sans-serif" }}>{phase}</div>
+                  <div style={{ display:"flex", flexWrap:"wrap", gap:7 }}>
+                    {items.map(item=><span key={item} style={{ fontSize:12, background:T.panel, border:`1px solid ${T.border}`, borderRadius:8, padding:"4px 10px", color:T.muted, fontFamily:"'DM Sans',sans-serif" }}>{item}</span>)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ── COMPANY ── */}
+      {page === "company" && (
+        <>
+          <div style={{ padding:"140px 48px 64px", textAlign:"center" }}>
+            <div style={ey}>Who We Are</div>
+            <h1 style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:"clamp(38px,6vw,62px)", fontWeight:600, color:T.ink, lineHeight:1.1 }}>Kulan Group Ltd</h1>
+            <p style={{ fontSize:16, color:T.muted, maxWidth:500, margin:"14px auto 0", lineHeight:1.7, fontFamily:"'DM Sans',sans-serif" }}>Building technology for the Somali diaspora and Muslim communities.</p>
+          </div>
+          <div style={{ maxWidth:760, margin:"0 auto", padding:"0 24px 88px" }}>
+            <div style={{ ...cardS, marginBottom:20 }}>
+              <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:28, fontWeight:600, color:T.ink, marginBottom:16 }}>About</div>
+              <p style={{ fontSize:15, color:T.muted, lineHeight:1.8, marginBottom:14, fontFamily:"'DM Sans',sans-serif" }}>Kulan Group Ltd is a holding company that builds useful, honest technology for the Somali diaspora and the wider Muslim community. Every product under the Kulan umbrella was built to solve a real problem the community faces.</p>
+              <p style={{ fontSize:15, color:T.muted, lineHeight:1.8, fontFamily:"'DM Sans',sans-serif" }}>The name Kulan comes from the Somali word for gathering or coming together. That spirit runs through everything we build. Technology that brings people closer to their faith, their families, and each other.</p>
+            </div>
+
+            {/* MADARASA INQUIRY FORM */}
+            <div style={{ ...cardS, marginBottom:20, border:`1px solid ${dark?"rgba(45,106,79,0.3)":"rgba(27,67,50,0.2)"}`, background:dark?"rgba(27,67,50,0.08)":T.card }}>
+              <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:28, fontWeight:600, color:T.ink, marginBottom:6 }}>Madarasa and School Inquiries</div>
+              <p style={{ fontSize:14, color:T.muted, lineHeight:1.6, marginBottom:24, fontFamily:"'DM Sans',sans-serif" }}>Interested in bringing Noor to your Islamic school or madarasa? Fill in the form and we will be in touch before launch.</p>
+              {contactDone ? (
+                <div style={{ background:dark?"rgba(45,106,79,0.2)":"rgba(27,67,50,0.07)", border:`1px solid rgba(27,67,50,0.2)`, borderRadius:14, padding:24, textAlign:"center", animation:"fadeUp 0.4s ease" }}>
+                  <div style={{ fontSize:32, marginBottom:8 }}>✓</div>
+                  <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:22, color:T.ink, marginBottom:6 }}>Message received</div>
+                  <div style={{ fontSize:14, color:T.muted, fontFamily:"'DM Sans',sans-serif" }}>We will be in touch before Noor launches. JazakAllahu khayran.</div>
+                </div>
+              ) : (
+                <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+                  <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
+                    <input placeholder="Your name" value={contactForm.name} onChange={e=>setContactForm(f=>({...f,name:e.target.value}))} style={inputS} />
+                    <input placeholder="Organization / Madarasa name" value={contactForm.org} onChange={e=>setContactForm(f=>({...f,org:e.target.value}))} style={inputS} />
+                  </div>
+                  <input placeholder="Email address" type="email" value={contactForm.email} onChange={e=>setContactForm(f=>({...f,email:e.target.value}))} style={inputS} />
+                  <textarea placeholder="Tell us about your school, how many students, and what you need..." value={contactForm.msg} onChange={e=>setContactForm(f=>({...f,msg:e.target.value}))} rows={4} style={{ ...inputS, resize:"vertical" }} />
+                  <button onClick={async ()=>{
+                    if(!contactForm.name||!contactForm.email) return;
+                    try {
+                      await fetch("https://formspree.io/f/mjgzlgwy", {
+                        method:"POST",
+                        headers:{"Content-Type":"application/json"},
+                        body:JSON.stringify({
+                          name: contactForm.name,
+                          organization: contactForm.org,
+                          email: contactForm.email,
+                          message: contactForm.msg,
+                          _subject: `Noor Madarasa Inquiry from ${contactForm.name}`
+                        })
+                      });
+                    } catch(e) {}
+                    setContactDone(true);
+                  }} style={{ ...btnGreen, alignSelf:"flex-start" }}>Send Message</button>
+                </div>
+              )}
+            </div>
+
+            <div style={{ ...cardS, marginBottom:20 }}>
+              <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:28, fontWeight:600, color:T.ink, marginBottom:20 }}>Contact</div>
+              <div className="contact-grid" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14 }}>
+                {[{label:"Email", val:"mohamedmohammud@gmail.com", href:"mailto:mohamedmohammud@gmail.com", icon:<MailIcon />},
+                  {label:"LinkedIn", val:"linkedin.com/in/mohamed-2-mohamud", href:"https://linkedin.com/in/mohamed-2-mohamud", icon:<LIIcon />},
+                  {label:"Website", val:"mmohamud.me", href:"https://mmohamud.me", icon:<WebIcon />},
+                  {label:"Company", val:"Kulan Group Ltd", href:null, icon:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>},
+                ].map(({label,val,href,icon})=>(
+                  <div key={label} style={{ background:T.panel, border:`1px solid ${T.border}`, borderRadius:14, padding:20 }}>
+                    <div style={{ display:"flex", alignItems:"center", gap:6, fontSize:10, letterSpacing:"0.2em", textTransform:"uppercase", color:T.gold, marginBottom:8, fontFamily:"'DM Sans',sans-serif" }}>{icon}{label}</div>
+                    <div style={{ fontSize:14, fontWeight:500, color:T.ink, fontFamily:"'DM Sans',sans-serif" }}>{href?<a href={href} target="_blank" rel="noopener" style={{ color:G.green, textDecoration:"none" }}>{val}</a>:val}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ── LEGAL ── */}
+      {page === "legal" && (
+        <>
+          <div style={{ padding:"140px 48px 64px", textAlign:"center" }}>
+            <div style={ey}>Legal</div>
+            <h1 style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:"clamp(38px,6vw,62px)", fontWeight:600, color:T.ink, lineHeight:1.1 }}>Legal Information</h1>
+            <p style={{ fontSize:16, color:T.muted, maxWidth:500, margin:"14px auto 0", lineHeight:1.7, fontFamily:"'DM Sans',sans-serif" }}>Privacy policy, terms of service, and data practices for Noor and Kulan Group Ltd.</p>
+          </div>
+          <div style={{ maxWidth:760, margin:"0 auto", padding:"0 24px 88px" }}>
+            <div style={{ fontSize:13, color:T.muted, marginBottom:44, padding:"14px 18px", background:T.panel, borderRadius:12, borderLeft:`3px solid ${T.gold}`, fontFamily:"'DM Sans',sans-serif" }}>
+              Last updated May 2026. Operated by Kulan Group Ltd. Questions: mohamedmohammud@gmail.com
+            </div>
+            {[["Privacy Policy",[
+              ["What We Collect","Noor collects only what is necessary. When you create an account we collect your email and display name. When you use the app we store Quran progress, lesson completions, and dhikr session logs. Guest mode sends nothing to our servers. We do not collect location data and do not track behavior for advertising."],
+              ["What We Never Do","We never sell user data to any third party. We never share data outside of what is required to operate the service. We never show ads inside the app. We never use your data to train AI models without explicit consent."],
+              ["Data Storage","User data is stored in Supabase on AWS. Every user's data is isolated using Row Level Security at the database level. One user cannot read another user's data. Connections are encrypted with TLS."],
+              ["Your Rights","You can request a copy of all data we hold. You can delete your account and all data from Settings. You can use Noor in Guest mode with nothing leaving your device. A child's progress is never deleted without parent confirmation."],
+            ]],["Terms of Service",[
+              ["Using Noor","Noor is provided by Kulan Group Ltd. By using the app you agree to these terms. You must be 18 or older to create an account. Parents may create child profiles for children in their care."],
+              ["Subscriptions","Noor Family and Noor Education are subscription tiers billed through Apple or Google. Free trials require no credit card. Cancellation takes effect at the end of the current billing period. Refunds follow App Store or Google Play policies."],
+              ["Governing Law","These terms are governed by the laws of the United States. Disputes will be resolved under applicable federal and state law."],
+            ]]].map(([section,items])=>(
+              <div key={section} style={{ marginBottom:52 }}>
+                <h2 style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:30, fontWeight:600, color:T.ink, marginBottom:18, borderBottom:`1px solid ${T.border}`, paddingBottom:12 }}>{section}</h2>
+                {items.map(([title,body])=>(
+                  <div key={title} style={{ marginBottom:22 }}>
+                    <h3 style={{ fontSize:16, fontWeight:600, color:T.ink, marginBottom:9, fontFamily:"'DM Sans',sans-serif" }}>{title}</h3>
+                    <p style={{ fontSize:15, color:T.muted, lineHeight:1.8, fontFamily:"'DM Sans',sans-serif" }}>{body}</p>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* ── FOOTER ── */}
+      <footer style={{ background:"#080D08", padding:"52px 40px 28px" }}>
+        <div className="footer-grid" style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", gap:36, marginBottom:44 }}>
+          <div>
+            <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:14 }}>
+              <div style={{ width:32, height:32, borderRadius:8, background:"linear-gradient(135deg,#1B4332,#0D2B1F)", border:"1px solid rgba(201,168,76,0.35)", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center" }}>
+                <span style={{ fontFamily:"'Amiri',serif", fontSize:14, color:"#C9A84C", lineHeight:1 }}>نور</span>
+                <span style={{ fontSize:5, color:"rgba(245,240,232,0.4)", letterSpacing:"0.2em" }}>NOOR</span>
+              </div>
+              <span style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:20, color:"#fff" }}>Noor</span>
+            </div>
+            <p style={{ fontSize:13, color:"rgba(255,255,255,0.28)", lineHeight:1.6, maxWidth:200, fontFamily:"'DM Sans',sans-serif" }}>The clean, ad-free Islamic learning app. Built by Kulan Group Ltd.</p>
+            <div style={{ display:"flex", gap:12, marginTop:16 }}>
+              <a href="https://linkedin.com/in/mohamed-2-mohamud" target="_blank" rel="noopener"
+                style={{ display:"flex", alignItems:"center", justifyContent:"center", width:32, height:32, borderRadius:8, background:"rgba(255,255,255,0.06)", border:"1px solid rgba(255,255,255,0.08)", color:"rgba(255,255,255,0.35)", textDecoration:"none", transition:"all 0.2s" }}
+                onMouseOver={e=>{e.currentTarget.style.background="rgba(201,168,76,0.15)";e.currentTarget.style.color="#C9A84C";}}
+                onMouseOut={e=>{e.currentTarget.style.background="rgba(255,255,255,0.06)";e.currentTarget.style.color="rgba(255,255,255,0.35)";}}>
+                <LIIcon />
+              </a>
+              <a href="https://mmohamud.me" target="_blank" rel="noopener"
+                style={{ display:"flex", alignItems:"center", justifyContent:"center", width:32, height:32, borderRadius:8, background:"rgba(255,255,255,0.06)", border:"1px solid rgba(255,255,255,0.08)", color:"rgba(255,255,255,0.35)", textDecoration:"none", transition:"all 0.2s" }}
+                onMouseOver={e=>{e.currentTarget.style.background="rgba(201,168,76,0.15)";e.currentTarget.style.color="#C9A84C";}}
+                onMouseOut={e=>{e.currentTarget.style.background="rgba(255,255,255,0.06)";e.currentTarget.style.color="rgba(255,255,255,0.35)";}}>
+                <WebIcon />
+              </a>
+            </div>
+          </div>
+          {[["Product",[["Home","home"],["Products","products"],["Pricing","home"],["Download","home"]]],
+            ["Company",[["About","company"],["Contact","company"],["Madarasa Inquiries","company"]]],
+            ["Legal",[["Privacy Policy","legal"],["Terms of Service","legal"],["Data Policy","legal"]]],
+          ].map(([title,links])=>(
+            <div key={title}>
+              <div style={{ fontSize:10, letterSpacing:"0.2em", textTransform:"uppercase", color:"rgba(255,255,255,0.22)", marginBottom:14, fontFamily:"'DM Sans',sans-serif" }}>{title}</div>
+              {links.map(([label,target])=>(
+                <div key={label} style={{ fontSize:13, color:"rgba(255,255,255,0.38)", marginBottom:10, cursor:"pointer", fontFamily:"'DM Sans',sans-serif", transition:"color 0.2s" }}
+                  onClick={()=>goPage(target)}
+                  onMouseOver={e=>e.target.style.color="#C9A84C"}
+                  onMouseOut={e=>e.target.style.color="rgba(255,255,255,0.38)"}>{label}</div>
+              ))}
+            </div>
+          ))}
+        </div>
+        <div style={{ borderTop:"1px solid rgba(255,255,255,0.05)", paddingTop:22, display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:10 }}>
+          <span style={{ fontSize:12, color:"rgba(255,255,255,0.18)", fontFamily:"'DM Sans',sans-serif" }}>© 2026 Kulan Group Ltd. All rights reserved. noor.mmohamud.me</span>
+          <span style={{ fontSize:12, color:"rgba(255,255,255,0.18)", fontFamily:"'DM Sans',sans-serif" }}>Noor · نور · Kulan Group Ltd</span>
+        </div>
+      </footer>
+
+      {/* ── FLOATING THEME TOGGLE ── */}
+      <button onClick={()=>{ const next=!dark; setDark(next); localStorage.setItem("noor-theme", next?"dark":"light"); }}
+        style={{ position:"fixed", bottom:28, right:24, zIndex:400, width:44, height:44, borderRadius:"50%", background:dark?"#162218":G.card, border:`1px solid ${T.border}`, cursor:"pointer", fontSize:17, display:"flex", alignItems:"center", justifyContent:"center", boxShadow:"0 4px 20px rgba(0,0,0,0.15)", opacity:scrolled?1:0, transform:scrolled?"translateY(0)":"translateY(16px)", transition:"opacity 0.35s, transform 0.35s, background 0.4s", pointerEvents:scrolled?"auto":"none" }}>
+        {dark?"☀️":"🌙"}
+      </button>
+
+      {/* ── BACK TO TOP ── */}
+      <button onClick={()=>window.scrollTo({top:0,behavior:"smooth"})}
+        style={{ position:"fixed", bottom:28, left:24, zIndex:400, width:44, height:44, borderRadius:"50%", background:dark?"#162218":G.card, border:`1px solid ${T.border}`, cursor:"pointer", fontSize:16, display:"flex", alignItems:"center", justifyContent:"center", boxShadow:"0 4px 20px rgba(0,0,0,0.12)", opacity:scrolled?1:0, transform:scrolled?"translateY(0)":"translateY(16px)", transition:"opacity 0.35s, transform 0.35s, background 0.4s", pointerEvents:scrolled?"auto":"none", color:T.ink }}>
+        ↑
+      </button>
+    </div>
+  );
 }
-
-// ── Also update hero download buttons ──
-document.querySelectorAll('a.dl-btn.apple').forEach(a => a.href = APPLE_URL);
-document.querySelectorAll('a.dl-btn.google').forEach(a => a.href = GOOGLE_URL);
-</script>
-</body></html>
